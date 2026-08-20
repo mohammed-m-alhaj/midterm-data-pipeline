@@ -1,0 +1,31 @@
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments & IDEs
+.venv/
+env/
+venv/
+.env
+.idea/
+.vscode/
+
+# Temporary Spark & System Files
+.spark_temp/
+Thumbs.db
+Desktop.ini
+*.log
+*.tmp
+
+# Large CSV Datasets (GitHub 100MB Limit Guard)
+data/*.csv
+!data/orders_test_5k.csv
+
+# Reports & Screenshots
+reports/screenshots/*
+!reports/screenshots/.gitkeep
