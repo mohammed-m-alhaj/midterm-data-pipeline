@@ -1,0 +1,14 @@
+﻿[96m=================================================================[0m
+[1m[92mMONGODB SETUP & JSON SCHEMA VALIDATION CONFIRMATION[0m
+[96m=================================================================[0m
+[97mDatabase              :[0m [96mmidterm_pipeline[0m
+[97mRaw collection        :[0m [92morders_raw[0m
+[97mValidated collection  :[0m [92morders_validated[0m
+[97mQuarantine collection :[0m [92morders_quarantine[0m
+[97mJSON Schema Validation:[0m [1m[92mENFORCED ($jsonSchema strict mode)[0m
+[97mSchema Required Fields:[0m [93morder_id, order_date, customer_id, items_json, quality_status, record_hash[0m
+[97mAllowed Currencies    :[0m [95m['YER', null][0m
+[97mAllowed Statuses      :[0m [95m['valid', 'corrected'][0m
+[97mUnique Validated Key  :[0m [1m[96muq_validated_order_id ON order_id (UNIQUE=TRUE)[0m
+[96m=================================================================[0m
+

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from common import PROJECT_ROOT  # noqa: F401
+from bootstrap import ensure_project_root
+
+ensure_project_root()
 
 from pymongo import ASCENDING, MongoClient
 
 from config.settings import (
     MONGO_DATABASE,
+    MONGO_TIMEOUT_MS,
     MONGO_URI,
     QUARANTINE_COLLECTION,
     RAW_COLLECTION,
@@ -31,7 +34,16 @@ VALIDATED_SCHEMA = {
         "customer_name": {"bsonType": ["string", "null"]},
         "customer_phone": {"bsonType": ["string", "null"]},
         "customer_email": {"bsonType": ["string", "null"]},
+        "city": {"bsonType": ["string", "null"]},
+        "district": {"bsonType": ["string", "null"]},
+        "delivery_type": {"bsonType": ["string", "null"]},
+        "delivery_cost": {"bsonType": ["double", "int", "long", "null"]},
+        "payment_method": {"bsonType": ["string", "null"]},
+        "payment_status": {"bsonType": ["string", "null"]},
+        "payment_amount": {"bsonType": ["double", "int", "long", "null"]},
         "currency": {"enum": ["YER", None]},
+        "total_amount": {"bsonType": ["double", "int", "long", "null"]},
+        "items_json": {"bsonType": "string"},
         "quality_status": {"enum": ["valid", "corrected"]},
         "record_hash": {"bsonType": "string"},
         "corrections": {"bsonType": "array"},
@@ -40,7 +52,7 @@ VALIDATED_SCHEMA = {
 
 
 def setup_mongodb() -> None:
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
     try:
         client.admin.command("ping")
         db = client[MONGO_DATABASE]
@@ -82,15 +94,19 @@ def setup_mongodb() -> None:
         quarantine.create_index([("error_codes", ASCENDING)], name="idx_quarantine_error_codes")
         quarantine.create_index([("run_id", ASCENDING)], name="idx_quarantine_run_id")
 
-        print("=" * 60)
-        print("MONGODB SETUP")
-        print("=" * 60)
-        print(f"Database              : {MONGO_DATABASE}")
-        print(f"Raw collection        : {RAW_COLLECTION}")
-        print(f"Validated collection  : {VALIDATED_COLLECTION}")
-        print(f"Quarantine collection : {QUARANTINE_COLLECTION}")
-        print("Unique validated key  : order_id")
-        print("=" * 60)
+        print("\033[96m" + "=" * 65 + "\033[0m")
+        print("\033[1m\033[92mMONGODB SETUP & JSON SCHEMA VALIDATION CONFIRMATION\033[0m")
+        print("\033[96m" + "=" * 65 + "\033[0m")
+        print(f"\033[97mDatabase              :\033[0m \033[96m{MONGO_DATABASE}\033[0m")
+        print(f"\033[97mRaw collection        :\033[0m \033[92m{RAW_COLLECTION}\033[0m")
+        print(f"\033[97mValidated collection  :\033[0m \033[92m{VALIDATED_COLLECTION}\033[0m")
+        print(f"\033[97mQuarantine collection :\033[0m \033[92m{QUARANTINE_COLLECTION}\033[0m")
+        print(f"\033[97mJSON Schema Validation:\033[0m \033[1m\033[92mENFORCED ($jsonSchema strict mode)\033[0m")
+        print(f"\033[97mSchema Required Fields:\033[0m \033[93morder_id, order_date, customer_id, items_json, quality_status, record_hash\033[0m")
+        print(f"\033[97mAllowed Currencies    :\033[0m \033[95m['YER', null]\033[0m")
+        print(f"\033[97mAllowed Statuses      :\033[0m \033[95m['valid', 'corrected']\033[0m")
+        print(f"\033[97mUnique Validated Key  :\033[0m \033[1m\033[96muq_validated_order_id ON order_id (UNIQUE=TRUE)\033[0m")
+        print("\033[96m" + "=" * 65 + "\033[0m\n")
     finally:
         client.close()
 

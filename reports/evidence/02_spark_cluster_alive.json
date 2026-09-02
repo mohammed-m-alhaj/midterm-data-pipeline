@@ -1,0 +1,63 @@
+﻿{
+
+  "url" : "spark://127.0.0.1:7077",
+
+  "workers" : [ {
+
+    "id" : "worker-20260826001835-192.168.8.181-56355",
+
+    "host" : "192.168.8.181",
+
+    "port" : 56355,
+
+    "webuiaddress" : "http://192.168.8.181:8081",
+
+    "cores" : 8,
+
+    "coresused" : 0,
+
+    "coresfree" : 8,
+
+    "memory" : 8192,
+
+    "memoryused" : 0,
+
+    "memoryfree" : 8192,
+
+    "resources" : { },
+
+    "resourcesused" : { },
+
+    "resourcesfree" : { },
+
+    "state" : "ALIVE",
+
+    "lastheartbeat" : 1787692716297
+
+  } ],
+
+  "aliveworkers" : 1,
+
+  "cores" : 8,
+
+  "coresused" : 0,
+
+  "memory" : 8192,
+
+  "memoryused" : 0,
+
+  "resources" : [ { } ],
+
+  "resourcesused" : [ { } ],
+
+  "activeapps" : [ ],
+
+  "completedapps" : [ ],
+
+  "activedrivers" : [ ],
+
+  "completeddrivers" : [ ],
+
+  "status" : "ALIVE"
+
+}

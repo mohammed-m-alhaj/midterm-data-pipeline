@@ -1,105 +1,101 @@
-# 🚀 Enterprise Hybrid Data Pipeline & Quality ELT Architecture
-### *High-Throughput Order Processing Framework: Streaming Python Batch + Parallel Apache Spark + MongoDB + Automated Data Quality Engine*
+# 🚀 خط البيانات الهجين المتقدم ومعالجة جودة البيانات الضخمة
+### *Enterprise Hybrid Data Pipeline: Streaming Python Batch + Distributed Apache Spark + MongoDB + Automated Data Quality Engine*
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PySpark](https://img.shields.io/badge/PySpark-4.2.0-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)](https://spark.apache.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Spark Cluster](https://img.shields.io/badge/Cluster-Spark_Standalone-007ACC?style=for-the-badge&logo=apache&logoColor=white)](https://spark.apache.org/docs/latest/spark-standalone.html)
-[![Test Suite](https://img.shields.io/badge/Tests-33%20Passed%20%7C%20100%25-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![Test Suite](https://img.shields.io/badge/Tests-15%20Passed%20%7C%20100%25-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge)](https://github.com/)
 
 ---
 
-## 📌 Executive Summary
+## 📌 1. الملخص التنفيذي وفكرة المشروع (Executive Summary)
 
-This repository delivers an **Enterprise-Grade Hybrid Data Pipeline** built to process large volumes of dirty, unformatted order data. The system dynamically routes datasets to the optimal ingestion engine based on file size thresholds:
-- **Streaming Python Batch Engine:** Processes datasets $\le 200\text{ MB}$ using Python's streaming `csv.DictReader` and chunked MongoDB insertions without loading files into memory.
-- **Distributed PySpark Engine:** Processes datasets $> 200\text{ MB}$ using PySpark DataFrame API, parallel partition rebalancing, and high-speed write tasks via the official MongoDB Spark Connector.
+تم تطوير هذا المشروع كحل مؤسسي متكامل لمعالجة مجموعات البيانات الضخمة وغير المنظمة الخاصة بطلبات المتاجر الإلكترونية (E-Commerce Orders Dataset)، وفقاً لمتطلبات **المشروع النصفي لمقرر البيانات الضخمة (القسم العملي) - المستوى الرابع، تخصص الذكاء الاصطناعي - جامعة الرازي**.
 
-Following a strict **ELT (Extract, Load, Transform)** pattern, raw records are first ingested unmodified into MongoDB (`orders_raw`) to preserve complete source history and audit trails. Subsequently, PySpark executes automated data cleaning, standardization, and quality classification—separating records into **`orders_validated`** (with complete audit trails) or isolating unfixable records in **`orders_quarantine`** (with explicit error codes).
+يعتمد المشروع على نمط **ELT (Extract $\rightarrow$ Load $\rightarrow$ Transform)** مع التوجيه الذكي التلقائي:
+- **محرك التحميل التدفقي بالبايثون (Streaming Python Batch):** لمعالجة الملفات الصغيرة ($\le 200\text{ MB}$) عبر `csv.DictReader` ودفعات `insert_many` تدفقية دون تحميل الملف كاملاً في الذاكرة RAM.
+- **محرك المعالجة المتوازية بـ Spark (Distributed PySpark Engine):** لمعالجة الملفات الكبيرة والضخمة ($> 200\text{ MB}$) باستخدام `PySpark DataFrame API` وتوزيع المهام على الـ Partitions والكتابة المتوازية المباشرة عبر `MongoDB Spark Connector`.
+- **مبدأ الحفاظ الكامل على البيانات الخام (Zero-Loss Raw Ingestion):** تُحمّل البيانات أولاً دون حذف أو تصفية إلى `orders_raw` مع إرفاق بيانات التتبع والسلالة (`run_id`, `source_file`, `source_row_number`, `ingested_at`, `engine_used`).
+- **محرك الجودة والتنظيف الحتمي (9 Automated Quality Rules):** تطبيع الأرقام والأسعار والعملات والهواتف والبريد وحالات الطلب، مع فرز السجلات إلى `orders_validated` (مع سجل تدقيق `corrections`) أو عزل السجلات التالفة في `orders_quarantine` مع ذكر أكواد وأسباب العزل.
+- **اللاتكرارية والتحديث الذكي (Idempotency & Upsert):** الاعتماد على المفتاح الثابت `order_id` وتجزئة التشفير `SHA-256 (record_hash)` لضمان عدم إنشاء أي سجلات مكررة عند إعادة التشغيل.
 
 ---
 
-## 🏗️ System Architecture & Data Flow
+## 🏗️ 2. المعمارية المعمارية وتدفق البيانات (System Architecture)
 
-```
-                                  +-------------------+
-                                  |  Unclean CSV File |
-                                  +---------+---------+
-                                            |
-                                            v
-                                 +---------------------+
-                                 |   src/file_router   |
-                                 +----------+----------+
-                                            |
-                    +-----------------------+-----------------------+
-                    |                                               |
-         [ Size <= 200 MB ]                                [ Size > 200 MB ]
-                    |                                               |
-                    v                                               v
-        +-----------------------+                       +-----------------------+
-        |   src/batch_loader    |                       |   src/spark_loader    |
-        |  (Python Streaming)   |                       |    (PySpark Parallel) |
-        +-----------+-----------+                       +-----------+-----------+
-                    |                                               |
-                    +-----------------------+-----------------------+
-                                            |
-                                            v
-                                 +---------------------+
-                                 | MongoDB: orders_raw | (Raw Source Retention)
-                                 +----------+----------+
-                                            |
-                                            v
-                                 +---------------------+
-                                 |  src/elt_pipeline   | (PySpark Quality Transformation)
-                                 +----------+----------+
-                                            |
-                    +-----------------------+-----------------------+
-                    |                                               |
-            [ Valid / Corrected ]                               [ Corrupt / Invalid ]
-                    |                                               |
-                    v                                               v
-        +-----------------------+                       +-----------------------+
-        | MongoDB: orders_valid |                       | MongoDB: orders_quar. |
-        | (Unique Index + Hash) |                       | (Error Codes & Cause) |
-        +-----------------------+                       +-----------------------+
+```mermaid
+flowchart TD
+    subgraph S1 [" 1. استلام وتوجيه الملف (Ingestion & Routing) "]
+        A["📄 ملف CSV خام<br/><b>(Dirty Orders Dataset)</b>"] --> B{"🔀 موجه الملفات<br/><b>src/file_router.py</b><br/>حجم الملف <= 200 MB؟"}
+        B -- "نعم (حجم صغير)" --> C["⚡ تحميل تدفقي بالبايثون<br/><b>src/batch_loader.py</b><br/>• Streaming csv.DictReader<br/>• Batched insert_many"]
+        B -- "لا (حجم ضخم)" --> D["🚀 معالجة متوازية بـ Spark<br/><b>src/spark_loader.py</b><br/>• Fixed Schema & Repartition<br/>• Mongo Spark Connector"]
+    end
+
+    subgraph S2 [" 2. طبقة التخزين الخام (Raw Storage Layer) "]
+        C --> E[("🥉 MongoDB: orders_raw<br/><b>(حفظ كامل للسجلات الأصلية)</b><br/>• run_id & source_row_number<br/>• raw_record (Original JSON)<br/>• ingested_at & engine_used")]
+        D --> E
+    end
+
+    subgraph S3 [" 3. محرك التحويل وتطبيق قواعد الجودة (ELT & Quality Rules Engine) "]
+        E --> F["⚙️ محرك التحويل الموزع<br/><b>src/elt_pipeline.py</b><br/>قراءة الدفعة عبر run_id في PySpark"]
+        F --> G["🧹 9 قواعد تنظيف وتطبيع حتمية<br/><b>src/quality_rules.py</b><br/>• تحويل الأرقام العربية إلى إنجليزية<br/>• توحيد العملة إلى YER وإزالة النصوص<br/>• تنظيف فواصل الآلاف والأرقام النصية<br/>• توحيد أرقام الهواتف (+9677XXXXXXXX)<br/>• إصلاح الرموز المكررة في البريد الإلكتروني<br/>• توحيد التواريخ إلى ISO Timestamp<br/>• إعادة احتساب إجمالي الطلب ومطابقته"]
+    end
+
+    subgraph S4 [" 4. فحص الجودة والتصنيف (Quality Classification & Hashing) "]
+        G --> H{"🔍 هل يحتوي السجل<br/>على أخطاء غير قابلة للإصلاح؟"}
+        H -- "سليم أو مصحح بأمان" --> I["✅ إنشاء سجل تدقيق (Audit Trail)<br/>• quality_status = valid / corrected<br/>• corrections [field, old, new, rule]<br/>• حساب record_hash (SHA-256)"]
+        H -- "خطأ جسيم أو غير قابل للإصلاح" --> J["⚠️ تصنيف للعزل (Quarantine)<br/>• quality_status = quarantine<br/>• error_codes [MISSING_ID, CORRUPT_JSON...]<br/>• error_details"]
+    end
+
+    subgraph S5 [" 5. طبقات التخزين النهائية (Final Storage Layers) "]
+        I --> K[("🥇 MongoDB: orders_validated<br/><b>(Idempotent Upsert)</b><br/>• مفتاح فريد: uq_validated_order_id<br/>• عملية Replace/Upsert على order_id<br/>• إحصاء: inserted / updated / unchanged")]
+        J --> L[("🛡️ MongoDB: orders_quarantine<br/><b>(سجلات معزولة للدراسة والتحليل)</b><br/>• عزل الأخطاء دون إسقاطها")]
+    end
+
+    subgraph S6 [" 6. المراقبة والمقاييس (Observability & Metrics) "]
+        K --> M["📊 حفظ مقاييس الأداء<br/><b>reports/results.json</b><br/>• الزمن، معدل التدفق (rows/s)<br/>• عدد الإدخالات والتحديثات<br/>• التحقق من معادلة الاتساق"]
+        L --> M
+    end
 ```
 
 ---
 
-## ✨ Key Technical Capabilities
+## ✨ 3. الميزات التقنية الرئيسية (Core Features)
 
-### 1. Dynamic Engine Router (`src/file_router.py`)
-- Central entry point via `src/main.py`.
-- Evaluates file size against `SMALL_FILE_THRESHOLD_MB` (Default: 200 MB).
-- Logs chosen engine, file size, threshold, and resolution reason prior to execution.
+### 1️⃣ موجه المحركات الديناميكي (`src/file_router.py`)
+- يفحص حجم الملف بالميجابايت تلقائياً مقابل الحد `SMALL_FILE_THRESHOLD_MB` (افتراضياً 200 MB).
+- يولد `run_id` فريد من نوع UUID لكل عملية تشغيل، ويوثق سبب الاختيار قبل البدء.
 
-### 2. Zero-Loss Raw Ingestion Layer (`orders_raw`)
-- Ingests raw CSV records without prior dropping, trimming, or filtering.
-- Attaches source lineage metadata to every document:
-  - `run_id`: Unique UUID generated for the pipeline run.
-  - `source_file`: Absolute filesystem path of the source dataset.
-  - `source_row_number`: Exact CSV line number.
-  - `ingested_at`: ISO timestamp of ingestion.
-  - `engine_used`: Processing engine used (`python_batch` or `pyspark`).
-  - `raw_record`: Unmodified JSON payload representing original CSV values.
+### 2️⃣ طبقة التخزين الخام وميثاق السلالة (`orders_raw`)
+- لا يُسقط أي سجل مشوه، بل يتم حفظ النص الأصلي للسطر كـ JSON داخل `raw_record`.
+- توثيق سلالة البيانات (Lineage):
+  - `run_id`: معرف الدفعة الفريد.
+  - `source_file`: المسار المطلق لملف المصدر.
+  - `source_row_number`: رقم السطر في ملف الـ CSV الأصلي.
+  - `ingested_at`: الطابع الزمني لعملية التحميل.
+  - `engine_used`: المحرك المنفذ (`python_batch` أو `pyspark`).
 
-### 3. 9 Automated Quality Transformation Rules
-Executed in PySpark (`src/elt_pipeline.py` & `src/quality_rules.py`) with deterministic, non-speculative transformation logic:
-1. **Arabic Digits Conversion:** Normalizes `٠١٢٣٤٥٦٧٨٩` to standard ASCII `0123456789`.
-2. **Currency Standardization:** Cleans textual currency symbols (`ريال`, `ر.ي`, `YER`) and normalizes valid codes to `YER`.
-3. **Thousands Separators Removal:** Strips commas and Arabic decimal points (`125,000.00` $\rightarrow$ `125000.00`).
-4. **Textual Word Prices:** Converts known word prices ("ألفان" $\rightarrow 2000$, "خمسة آلاف" $\rightarrow 5000$).
-5. **Phone Number Standardization:** Normalizes Yemeni mobile phone formats to canonical `+9677XXXXXXXX`.
-6. **Email Symbol Repair:** Repairs repeated symbols (`user@@mail..com` $\rightarrow$ `user@mail.com`) via regex rules.
-7. **Date Format Standardization:** Parses diverse date formats (`yyyy-MM-dd`, `dd/MM/yyyy`, ISO) into standard ISO timestamps.
-8. **Status Synonym Mapping:** Trims whitespace and maps synonyms ("مدفوع" / "دفع" $\rightarrow$ "تم الدفع").
-9. **Total Recalculation:** Recomputes order total ($Total = \sum Items + Delivery$) when item unit prices and delivery costs are valid.
+### 3️⃣ قواعد التحويل والتنظيف الحتمية الـ 9 (`src/quality_rules.py`)
 
-### 4. Comprehensive Audit Trail (`corrections`)
-Every corrected record in `orders_validated` maintains an explicit `corrections` array detailing field alterations:
+| # | اسم القاعدة | المشكلة المعالجة | مثال على التحويل | رمز القاعدة (`rule_code`) |
+|---|---|---|---|---|
+| 1 | **Arabic Digits** | تحويل الأرقام المشرقية `٠-٩` إلى إنجليزية | `٥٠٠٠` $\rightarrow$ `5000` | `MONEY_NORMALIZE` |
+| 2 | **Currency Standardize** | توحيد العملة وإزالة النصوص الزائدة | `12,500 ريال يمني` $\rightarrow$ `12500` والعملة `YER` | `CURRENCY_STANDARDIZE` |
+| 3 | **Thousands Separators** | إزالة الفواصل والرموز العشرية المحلية | `125,000.00` و `٫` $\rightarrow$ `125000.00` | `MONEY_NORMALIZE` |
+| 4 | **Word Prices** | تحويل الأسعار المكتوبة بالكلمات العربية | `خمسة آلاف` $\rightarrow 5000$، `ألفان` $\rightarrow 2000$ | `MONEY_NORMALIZE` |
+| 5 | **Phone Normalize** | توحيد أرقام الهواتف اليمنية للصيغة الدولية | `00967771234567` / `771234567` $\rightarrow$ `+967771234567` | `PHONE_NORMALIZE` |
+| 6 | **Email Repair** | إصلاح الرموز المكررة والتحويل لأحرف صغيرة | `user@@gmail..com` $\rightarrow$ `user@gmail.com` | `EMAIL_REPEATED_SYMBOLS` |
+| 7 | **Date Standardize** | توحيد صيغ التواريخ المختلفة للصيغة القياسية | `25/08/2026` / `2026-08-25` $\rightarrow$ `2026-08-25T00:00:00` | `DATE_STANDARDIZE` |
+| 8 | **Status Synonyms** | توحيد مرادفات حالات الطلب والدفع | `مدفوع` / `دفع` $\rightarrow$ `تم الدفع`، `غير مدفوع` $\rightarrow$ `بانتظار الدفع` | `STATUS_STANDARDIZE` |
+| 9 | **Total Recalculation** | إعادة احتساب إجمالي الطلب ومطابقته | $Total = \sum Items + Delivery$ عند سلامة البنود | `TOTAL_RECALCULATE` |
+
+### 4️⃣ سجل التدقيق التفصيلي (`corrections`)
+تحتفظ السجلات المصححة في `orders_validated` بمصفوفة توثق كافة التغييرات:
 ```json
 {
+  "order_id": "ORD-12345",
   "quality_status": "corrected",
   "corrections": [
     {
@@ -107,147 +103,125 @@ Every corrected record in `orders_validated` maintains an explicit `corrections`
       "original_value": "user@@mail..com",
       "corrected_value": "user@mail.com",
       "rule_code": "EMAIL_REPEATED_SYMBOLS"
+    },
+    {
+      "field": "customer_phone",
+      "original_value": "٠٠٩٦٧٧٧١٢٣٤٥٦٧",
+      "corrected_value": "+967771234567",
+      "rule_code": "PHONE_NORMALIZE"
     }
   ]
 }
 ```
 
-### 5. Isolated Quarantine Layer (`orders_quarantine`)
-Records with irreparable or ambiguous errors are routed to `orders_quarantine` with explicit diagnostic codes:
+### 5️⃣ طبقة العزل الذكي (`orders_quarantine`)
+السجلات غير القابلة للتصحيح بأمان تُعزل مع ذكر الرمز والسبب بالعربية:
 
-| Error Code | Trigger Condition & Description |
+| رمز الخطأ (`error_code`) | سبب العزل في البيانات |
 |---|---|
-| `MISSING_ORDER_ID` | Order identifier is missing or null. |
-| `MISSING_CUSTOMER_ID` | Customer identifier is missing or null. |
-| `INVALID_IMPOSSIBLE_DATE` | Unparseable or non-existent date string. |
-| `CORRUPTED_ITEMS_JSON` | Malformed or invalid JSON array in `items_json`. |
-| `EMPTY_ITEMS` | Empty or missing order item list. |
-| `UNKNOWN_PRICE` | Missing or uninferrable unit prices. |
-| `AMBIGUOUS_NEGATIVE_VALUE` | Unexplainable negative quantity or amount. |
-| `DUPLICATE_ORDER_ID` | Intra-batch duplicate business keys. |
-| `MULTIPLE_CONFLICTING_ERRORS` | Multiple fundamental errors preventing safe recovery. |
+| `MISSING_ORDER_ID` | معرف الطلب الأساسي مفقود أو فارغ |
+| `MISSING_CUSTOMER_ID` | معرف العميل غير موجود أو مفقود |
+| `INVALID_IMPOSSIBLE_DATE` | تاريخ مستحيل أو غير صحيح (مثل 31 فبراير) |
+| `CORRUPTED_ITEMS_JSON` | نص JSON لعناصر الطلب تالف ومكسور |
+| `EMPTY_ITEMS` | قائمة عناصر الطلب فارغة تماماً |
+| `UNKNOWN_PRICE` | سعر مفقود أو مكتوب كنص غير معروف |
+| `AMBIGUOUS_NEGATIVE_VALUE` | قيم مالية أو كميات سالبة غير منطقية |
+| `DUPLICATE_ORDER_ID` | معرف طلب مكرر داخل نفس الدفعة |
+| `MULTIPLE_CONFLICTING_ERRORS` | سجل يحتوي أكثر من خطأ جسيم معاً |
 
-### 6. Idempotency & Upsert Architecture
-- **Stable Business Key:** `order_id` serves as the primary business identifier.
-- **Database Uniqueness Enforcement:** Unique index `uq_validated_order_id` created on `orders_validated`.
-- **Spark Connector Upsert:** Configured with `operationType=replace`, `upsertDocument=true`, and `idFieldList=order_id`.
-- **SHA-256 Hash Auditing:** Generates `record_hash` per row to categorize database operations accurately into `inserted_count`, `updated_count`, and `unchanged_count`.
+### 6️⃣ اللاتكرارية والتحديث الذكي (Idempotency & Upsert Architecture)
+- **مفتاح الأعمال المستقر:** `order_id` هو المفتاح الفريد، ويتم فرض فرادته عبر الفهرس الفريد `uq_validated_order_id` في MongoDB.
+- **تجزئة التشفير SHA-256:** يتم حساب `record_hash` لكل سجل من خلال دمج كافة الحقول المنظفة.
+- **الكتابة عبر Upsert:** عند إعادة تشغيل نفس الملف، يقارن النظام الهاش:
+  - إذا تطابق الهاش $\rightarrow$ يعتبر غير معدل (`unchanged_count + 1`) ولا تزيد السجلات (`inserted_count = 0`).
+  - إذا اختلف الهاش $\rightarrow$ يتم تحديث السجل في مكانه مباشرة (`updated_count + 1`).
+
+### 7️⃣ معادلة اتساق الدفعة (Run Consistency Invariant)
+يتحقق الـ Pipeline عبر `assert` من المعادلة التالية في كل تشغيل:
+$$\text{raw\_count} = \text{valid\_count} + \text{corrected\_count} + \text{quarantine\_count}$$
 
 ---
 
-## 📂 Project Directory Structure
+## 📂 4. هيكل المجلدات والملفات (Directory Structure)
 
 ```text
 midterm-data-pipeline/
 ├── config/
-│   └── settings.py          # Centralized configuration & environment variables
+│   └── settings.py          # الإعدادات المركزية وقراءة متغيرات البيئة (.env)
 ├── src/
-│   ├── main.py              # Main unified entry point & CLI pipeline runner
-│   ├── file_router.py       # File size router & engine determination
-│   ├── batch_loader.py      # Memory-efficient Python CSV streaming loader
-│   ├── spark_loader.py      # PySpark parallel distributed CSV loader
-│   ├── elt_pipeline.py       # PySpark data quality transformation & ELT engine
-│   ├── quality_rules.py     # Deterministic data quality rules & regex patterns
-│   ├── mongo_setup.py       # MongoDB collection setup, validators & indexes
-│   └── metrics.py           # Execution metrics tracker & report logger
-├── cluster/                 # Path A Spark Standalone Cluster scripts
-├── data/                    # Sample datasets (Includes light demo sample)
-├── reports/                 # Pipeline execution reports & metrics history
-├── tests/                   # PyTest automated unit, quality & pipeline tests
-├── web/                     # Interactive Web Dashboard frontend
-├── dashboard_server.py      # Live Web Dashboard backend & API server
-├── conftest.py              # PyTest configuration & test setup
-├── requirements.txt         # Project Python dependencies
-└── README.md                # System documentation
+│   ├── main.py              # نقطة الدخول الموحدة للتشغيل (Unified CLI Entrypoint)
+│   ├── file_router.py       # محرك فحص الحجم وتوجيه الملفات (200MB Threshold)
+│   ├── batch_loader.py      # محرك التحميل التدفقي بالبايثون (Python Streaming Batch)
+│   ├── spark_loader.py      # محرك التحميل المتوازي بـ PySpark (Parallel Partitions)
+│   ├── elt_pipeline.py      # محرك التحويل وتطبيق قواعد الجودة والتصنيف
+│   ├── quality_rules.py     # القواعد الحتمية للتنظيف والتطبيع والتعابير النمطية
+│   ├── mongo_setup.py       # تهيئة مجموعات وفهارس وقواعد التحقق في MongoDB
+│   ├── metrics.py           # تتبع وتخزين مقاييس الأداء في reports/results.json
+│   ├── common.py            # أدوات مساعدة واكتشاف كرت الشاشة (GPU Detection)
+│   ├── create_small_sample.py # سكريبت توليد عينات مصغرة من الملف الضخم
+│   ├── run_4_files_full_test.py # اختبار شامل للـ 4 ملفات التي سيحضرها الدكتور
+│   ├── run_update_test.py   # اختبار التحقق من التحديث المباشر والـ Upsert
+│   └── test_flexibility_scenarios.py # اختبار سيناريوهات المرونة والحالات القصوى
+├── cluster/                 # سكريبتات تشغيل مسار Spark Standalone (Path A)
+├── data/                    # مجلد ملفات البيانات وعينات الاختبار
+├── reports/                 # تقارير الأداء ومخرجات results.json ولقطات الشاشة
+├── tests/                   # اختبارات الوحدة الآلية (PyTest)
+├── docs/                    # وثائق التوثيق المعماري، متطلبات المشروع، وإرشادات Path A
+├── DIAGRAM.md               # 9 مخططات معمارية تفاعلية شاملة (Mermaid)
+├── DIAGRAM.cd               # مخطط الكلاسات الرسمي (Visual Studio & UML Class Diagram)
+├── requirements.txt         # المكتبات والاعتماديات
+└── README.md                # دليل المشروع الكامل
 ```
 
 ---
 
-## ⚙️ Configuration Reference (`config/settings.py`)
+## 🚀 5. دليل التشغيل السريع للمناقشة (Execution Guide)
 
-All pipeline behaviors are controlled via centralized environment variables or default settings:
-
-| Setting Parameter | Description | Default Value |
-|---|---|---|
-| `INPUT_FILE` | Default CSV file processed by the pipeline | `data/orders_small_sample.csv` |
-| `SMALL_FILE_THRESHOLD_MB` | File size boundary (MB) for engine decision | `200` |
-| `BATCH_SIZE` | Insert batch size for Python Batch Loader | `1000` |
-| `SPARK_PARTITIONS` | Repartition count for PySpark parallel tasks | `8` |
-| `MONGO_URI` | MongoDB connection string URI | `mongodb://127.0.0.1:27017` |
-| `MONGO_DATABASE` | Target MongoDB database name | `midterm_pipeline` |
-
----
-
-## 💻 Prerequisites & Setup Instructions
-
-### 1. Prerequisites
-- **Python:** 3.11 or higher
-- **Java:** OpenJDK 17 (Required by PySpark)
-- **MongoDB Server:** Version 8.x running locally or on custom URI
-
-### 2. Installation
-Clone the repository and install required packages:
+### 1. تشغيل الـ Pipeline على أي ملف CSV يقدمه الدكتور:
 ```bash
-git clone https://github.com/your-username/hybrid-data-pipeline.git
-cd hybrid-data-pipeline
-pip install -r requirements.txt
+python src/main.py --file "مسار_الملف.csv"
+```
+
+### 2. تشغيل اختبار محاكاة الملفات الـ 4 الشامل:
+يقوم بإنشاء 4 ملفات مختلفة واختبار كافة سيناريوهات الدكتور تلقائياً:
+```bash
+python src/run_4_files_full_test.py
+```
+
+### 3. تشغيل اختبارات الوحدة الآلية (PyTest):
+```bash
+python -m pytest tests/ -v
+```
+*(النتيجة الحالية: **15 Passed بنسبة نجاح 100%**)*
+
+### 4. تشغيل الإثبات الحي الشامل لمراحل الخط:
+```bash
+python src/demo_live_execution_proof.py
+```
+
+### 5. تشغيل مسار Spark Standalone (Path A):
+**PowerShell (Windows):**
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\cluster\start_master.ps1
+# افتح المتصفح على http://127.0.0.1:8080 وتأكد من أن الـ Worker = ALIVE، ثم:
+.\cluster\run_path_a.ps1 -InputFile "data/test_file_3_large_pyspark.csv"
 ```
 
 ---
 
-## 🚀 Step-by-Step Execution Guide
+## 📊 6. قياسات ومؤشرات الأداء الميدانية (Performance Benchmarks)
 
-### 1. Initialize MongoDB Collections & Indexes
-```bash
-python src/mongo_setup.py
-```
+النتائج الموثقة من ملف القياسات الفعلي [`reports/results.json`](file:///c:/Users/Al-Haj/Desktop/midterm-data-pipeline/reports/results.json):
 
-### 2. Execute Pipeline (Automatic Engine Selection)
-```bash
-# Process a small dataset (Triggers Python Batch Mode)
-python src/main.py --file data/orders_test_5k.csv
-
-# Process a large dataset (Triggers PySpark Engine Mode)
-python src/main.py --file data/orders_spark_demo_250mb.csv
-```
-
-### 3. Idempotency Verification Test
-Re-run the exact same file to verify that **zero duplicate records** are added to `orders_validated`:
-```bash
-python src/main.py --file data/orders_test_5k.csv
-```
-
-### 4. Launch Interactive Web Dashboard & Live Visualizer
-```bash
-python dashboard_server.py
-```
-Open **`http://localhost:8000`** in your web browser to access live KPI summary cards, interactive MongoDB document inspector, and data quality rule visualizations.
-
----
-
-## 🧪 Automated Test Suite
-
-Run unit tests, transformation checks, and pipeline integrity assertions via PyTest:
-```bash
-python -m pytest
-```
-*Current Status:* **33 Passed, 1 Skipped (100% Pass Rate)**.
-
----
-
-## 📊 Benchmark Summary & Performance Analysis
-
-Runtime metrics captured during production benchmarks:
-
-| Engine / Phase | Input Dataset Size | Execution Time | Throughput | Key Metric / Result |
+| المحرك / المرحلة | حجم البيانات المعالجة | زمن التنفيذ | معدل السرعة (Throughput) | النتيجة المحققة |
 |---|---|---|---|---|
-| **Python Batch (Raw)** | 5,000 Rows (2.09 MB) | 0.10 s | **48,037 rows/s** | 5 Batches @ 1000 rows/batch |
-| **PySpark Raw Load** | 600,000 Rows (251.05 MB) | 17.11 s | **35,057 rows/s** | 8 Output Partitions Parallel Write |
-| **ELT Transformation** | 600,000 Rows (251.05 MB) | 50.82 s | **11,807 rows/s** | 515,388 Validated / 84,612 Quarantine |
-| **Idempotency Re-run** | 5,000 Rows (2.09 MB) | 23.89 s | N/A | **0 Inserted / 4,254 Unchanged (Zero Duplicates)** |
+| **Python Batch Loader** | 2,000 سطر (0.57 MB) | 0.08 ثانية | **24,500 rows/s** | تحميل تدفقي بدون حجز RAM |
+| **PySpark Parallel Load** | 600,000 سطر (251.05 MB) | 17.11 ثانية | **35,057 rows/s** | توزيع على 8 Partitions بالتوازي |
+| **ELT Quality Pipeline** | 600,000 سطر (251.05 MB) | 50.82 ثانية | **11,807 rows/s** | تطبيق 9 قواعد + عزل وتدقيق |
+| **Idempotency Re-Run** | 2,000 سطر (0.57 MB) | 0.09 ثانية | N/A | **0 إدخال جديد / 0 تكرار (Zero Duplicates)** |
 
 ---
 
-## 📄 License
-
-Developed as an Enterprise-Grade Hybrid Data Pipeline Solution for high-throughput order ingestion, data quality enforcement, and fault-tolerant ELT operations.
+## 📄 الترخيص
+تم تطوير هذا المشروع كحل مؤسسي لخطوط معالجة البيانات الضخمة وفحص جودة البيانات وعمليات الـ ELT الموزعة.

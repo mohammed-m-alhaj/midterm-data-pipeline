@@ -83,6 +83,8 @@ def normalize_phone(value: Any) -> str | None:
     digits = re.sub(r"\D", "", str(value).translate(ARABIC_DIGITS))
     if digits.startswith("00"):
         digits = digits[2:]
+    elif digits.startswith("0"):
+        digits = digits[1:]
 
     if digits.startswith("967"):
         national = digits[3:]
@@ -140,3 +142,30 @@ def standardize_status(value: Any) -> str | None:
 
 def classify_errors(error_codes: list[str]) -> str:
     return "quarantine" if error_codes else "valid"
+
+
+if __name__ == "__main__":
+    import sys
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
+    print("\033[96m" + "=" * 65 + "\033[0m")
+    print("\033[1m\033[92mAUTOMATED QUALITY CLEANING RULES DEMONSTRATION (SECTION 6.6)\033[0m")
+    print("\033[96m" + "=" * 65 + "\033[0m")
+
+    examples = [
+        ("1. Arabic Digits Conversion", "السعر ٥٠٠٠ ريال", to_decimal("٥٠٠٠ ريال")),
+        ("2. Currency Text Removal", "12500 YER", to_decimal("12500 YER")),
+        ("3. Thousands Separator Cleaning", "125,000.00", to_decimal("125,000.00")),
+        ("4. Price in Words Conversion", "خمسة آلاف", to_decimal("خمسة آلاف")),
+        ("5. Phone Number Normalization", "706026813", normalize_phone("706026813")),
+        ("6. Email Symbol Repair", "user@@gmail..com", normalize_email("user@@gmail..com")[0]),
+        ("7. Status Synonym Standardization", "مدفوع", standardize_status("مدفوع")),
+    ]
+
+    for rule, dirty, clean in examples:
+        print(f"\033[97m{rule:<35}:\033[0m \033[91m'{dirty}'\033[0m ➔ \033[1m\033[92m'{clean}'\033[0m")
+
+    print("\033[96m" + "=" * 65 + "\033[0m\n")
+

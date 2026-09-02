@@ -1,0 +1,31 @@
+﻿{
+
+  "url" : "spark://127.0.0.1:7077",
+
+  "workers" : [ ],
+
+  "aliveworkers" : 0,
+
+  "cores" : 0,
+
+  "coresused" : 0,
+
+  "memory" : 0,
+
+  "memoryused" : 0,
+
+  "resources" : [ ],
+
+  "resourcesused" : [ ],
+
+  "activeapps" : [ ],
+
+  "completedapps" : [ ],
+
+  "activedrivers" : [ ],
+
+  "completeddrivers" : [ ],
+
+  "status" : "ALIVE"
+
+}

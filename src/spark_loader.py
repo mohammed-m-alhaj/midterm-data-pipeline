@@ -1,55 +1,114 @@
 from __future__ import annotations
 
-from common import PROJECT_ROOT  # noqa: F401
-
 import logging
 import os
+import sys
 import time
 from pathlib import Path
+from uuid import uuid4
+
+from bootstrap import PROJECT_ROOT, ensure_project_root
+
+ensure_project_root()
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-from pyspark.sql.functions import current_timestamp, lit, monotonically_increasing_id
-from pyspark.sql.types import StringType, StructField, StructType
+from pyspark.sql import types as T
 
 from config.settings import (
     ALLOW_SPARK_LOCAL_FALLBACK,
     DATA_DIR,
     DISABLE_SPARK_FALLBACK,
+    ENABLE_GPU_ACCELERATION,
+    HUGE_FILE,
+    INPUT_FILE,
+    IVY_JARS_DIR,
     MONGO_DATABASE,
     MONGO_SPARK_CONNECTOR,
+    MONGO_TIMEOUT_MS,
     MONGO_URI,
     RAW_COLLECTION,
     RAW_COLUMNS,
+    SPARK_APP_NAME,
+    SPARK_DRIVER_MEMORY,
+    SPARK_EXECUTOR_CORES,
+    SPARK_EXECUTOR_MEMORY,
+    SPARK_FALLBACK_DRIVER_MEMORY,
+    SPARK_FALLBACK_EXECUTOR_MEMORY,
     SPARK_LOG_LEVEL,
     SPARK_MASTER_URL,
     SPARK_PARTITIONS,
+    SPARK_WRITE_BATCH_SIZE,
 )
+from src.common import get_gpu_info
 
 logger = logging.getLogger(__name__)
 
 
-def build_raw_schema() -> StructType:
-    return StructType([StructField(name, StringType(), True) for name in RAW_COLUMNS])
+def build_raw_schema() -> T.StructType:
+    return T.StructType([T.StructField(name, T.StringType(), True) for name in RAW_COLUMNS])
+
+
+import atexit
+import ctypes
+
+
+def suppress_exit_stderr() -> None:
+    try:
+        devnull = open(os.devnull, "w")
+        os.dup2(devnull.fileno(), 2)
+        if sys.platform.startswith("win"):
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.CreateFileW("NUL", 0x40000000, 0, None, 3, 0, None)
+            if handle != -1:
+                kernel32.SetStdHandle(-12, handle)
+    except Exception:
+        pass
+
+
+atexit.register(suppress_exit_stderr)
+
+
+def stop_spark_quietly(spark: SparkSession | None) -> None:
+    if spark is None:
+        return
+    try:
+        devnull = open(os.devnull, "w")
+        old_stderr = os.dup(2)
+        os.dup2(devnull.fileno(), 2)
+        try:
+            spark.stop()
+        finally:
+            os.dup2(old_stderr, 2)
+            os.close(old_stderr)
+            devnull.close()
+    except Exception:
+        try:
+            spark.stop()
+        except Exception:
+            pass
 
 
 def create_spark() -> SparkSession:
-    from config.settings import ENABLE_GPU_ACCELERATION
 
     builder = (
         SparkSession.builder
-        .appName("MidtermPipeline-SparkRawLoad")
+        .appName(SPARK_APP_NAME)
         .master(SPARK_MASTER_URL)
-        .config("spark.driver.memory", "2g")
-        .config("spark.executor.memory", "2g")
-        .config("spark.executor.cores", "4")
+        .config("spark.driver.memory", SPARK_DRIVER_MEMORY)
+        .config("spark.executor.memory", SPARK_EXECUTOR_MEMORY)
+        .config("spark.executor.cores", SPARK_EXECUTOR_CORES)
+        .config("spark.ui.showConsoleProgress", "false")
         .config("spark.sql.ansi.enabled", "false")
         .config("spark.sql.adaptive.enabled", "true")
         .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        .config("spark.local.dir", str(PROJECT_ROOT / ".spark_temp"))
+        .config("spark.shutdown.hook.enabled", "false")
+        .config("spark.driver.extraJavaOptions", "-Dlog4j2.shutdownHookEnabled=false -Dorg.apache.spark.suppressShutdownLogging=true")
+        .config("spark.executor.extraJavaOptions", "-Dlog4j2.shutdownHookEnabled=false -Dorg.apache.spark.suppressShutdownLogging=true")
+        .config("spark.local.dir", str(Path(os.environ.get("TEMP", str(PROJECT_ROOT / ".spark_temp"))) / "midterm_spark_temp"))
     )
 
-    ivy_jars = list(Path(os.path.expanduser("~/.ivy2.5.2/jars")).glob("*.jar"))
+    ivy_jars = list(IVY_JARS_DIR.glob("*.jar")) if IVY_JARS_DIR.is_dir() else []
     has_rapids = any("rapids" in j.name.lower() for j in ivy_jars)
 
     if ENABLE_GPU_ACCELERATION and has_rapids:
@@ -66,7 +125,14 @@ def create_spark() -> SparkSession:
 
     try:
         spark = builder.getOrCreate()
-        spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
+        spark.sparkContext.setLogLevel("ERROR")
+        try:
+            log4j = spark._jvm.org.apache.log4j
+            log4j.Logger.getRootLogger().setLevel(log4j.Level.ERROR)
+            log4j.Logger.getLogger("org").setLevel(log4j.Level.ERROR)
+            log4j.Logger.getLogger("py4j").setLevel(log4j.Level.ERROR)
+        except Exception:
+            pass
         return spark
     except Exception as exc:
         if SPARK_MASTER_URL.startswith("spark://"):
@@ -88,17 +154,17 @@ def create_spark() -> SparkSession:
                     pass
                 builder = (
                     SparkSession.builder
-                    .appName("MidtermPipeline-SparkRawLoad")
+                    .appName(SPARK_APP_NAME)
                     .master("local[*]")
-                    .config("spark.driver.memory", "4g")
-                    .config("spark.executor.memory", "4g")
+                    .config("spark.driver.memory", SPARK_FALLBACK_DRIVER_MEMORY)
+                    .config("spark.executor.memory", SPARK_FALLBACK_EXECUTOR_MEMORY)
                     .config("spark.mongodb.write.connection.uri", MONGO_URI)
                     .config("spark.mongodb.write.database", MONGO_DATABASE)
                     .config("spark.mongodb.write.collection", RAW_COLLECTION)
                     .config("spark.sql.ansi.enabled", "false")
                     .config("spark.sql.adaptive.enabled", "true")
                     .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-                    .config("spark.local.dir", str(PROJECT_ROOT / ".spark_temp"))
+                    .config("spark.local.dir", str(Path(os.environ.get("TEMP", str(PROJECT_ROOT / ".spark_temp"))) / "midterm_spark_temp"))
                 )
                 spark = builder.getOrCreate()
                 spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
@@ -124,10 +190,11 @@ def resolve_safe_spark_path(file_path: str | Path) -> str:
     return str(p.resolve())
 
 
-def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pyspark") -> dict:
+def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pyspark", partitions: int | None = None, close_spark: bool = False) -> dict:
     target_path_str = resolve_safe_spark_path(file_path)
     input_path = Path(file_path)
 
+    actual_partitions = int(partitions) if partitions and int(partitions) > 0 else SPARK_PARTITIONS
     spark: SparkSession | None = None
     started = time.perf_counter()
     try:
@@ -143,25 +210,29 @@ def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pysp
         )
 
         input_partitions = df.rdd.getNumPartitions()
-        # repartition justification (Section 6.4 of the brief):
-        # The Spark Connector reads the CSV as 1 partition by default on local[*].
-        # We repartition to SPARK_PARTITIONS (from config/settings.py) so that
-        # MongoDB Spark Connector write tasks are distributed across all available
-        # Executor cores/workers on the cluster — without this, only 1 task runs.
-        # Effect is visible in Spark UI: Tasks = SPARK_PARTITIONS on the Write stage.
-        repartitioned = df.repartition(SPARK_PARTITIONS)
+        repartitioned = df.repartition(actual_partitions)
         output_partitions = repartitioned.rdd.getNumPartitions()
+
+        # --- Repartition Evidence (explain) -----------------------------------
+        # Print the physical plan to prove repartition is applied.
+        # The output will show Exchange/RepartitionByExpression confirming
+        # that Spark actually redistributes data across SPARK_PARTITIONS.
+        # Capture this output in a screenshot for the demo.
+        logger.info(
+            "=== Physical Plan after repartition(%d) ===", SPARK_PARTITIONS
+        )
+        repartitioned.explain(True)
+        # ----------------------------------------------------------------------
 
         raw_record = F.to_json(F.struct(*[F.col(c) for c in RAW_COLUMNS]))
         enriched = (
             repartitioned
-            .withColumn("run_id", lit(run_id))
-            .withColumn("source_file", lit(str(input_path.resolve())))
-            .withColumn("source_row_number", monotonically_increasing_id() + lit(2))
-            .withColumn("ingested_at", current_timestamp())
-            .withColumn("engine_used", lit(engine_used))
+            .withColumn("run_id", F.lit(run_id))
+            .withColumn("source_file", F.lit(str(input_path.resolve())))
+            .withColumn("source_row_number", F.monotonically_increasing_id() + F.lit(2))
+            .withColumn("ingested_at", F.current_timestamp())
+            .withColumn("engine_used", F.lit(engine_used))
             .withColumn("raw_record", raw_record)
-            .withColumn("record_raw", raw_record)
             .select(
                 "run_id",
                 "source_file",
@@ -169,7 +240,6 @@ def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pysp
                 "ingested_at",
                 "engine_used",
                 "raw_record",
-                "record_raw",
             )
         )
 
@@ -180,8 +250,8 @@ def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pysp
             .option("connection.uri", MONGO_URI)
             .option("database", MONGO_DATABASE)
             .option("collection", RAW_COLLECTION)
-            .option("convertJson", "false")
-            .option("maxBatchSize", "512")
+            .option("convertjson", "false")
+            .option("maxbatchsize", str(SPARK_WRITE_BATCH_SIZE))
             .save()
         )
 
@@ -189,35 +259,29 @@ def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pysp
         rows_read = enriched.count()
         application_id = spark.sparkContext.applicationId or "N/A"
         
-        gpu_info = "N/A"
-        try:
-            import subprocess
-            gpu_out = subprocess.check_output("nvidia-smi --query-gpu=name,memory.total --format=csv,noheader", shell=True, stderr=subprocess.DEVNULL).decode().strip()
-            if gpu_out:
-                gpu_info = f"{gpu_out} [ACTIVE]"
-        except Exception:
-            pass
+        gpu_info = get_gpu_info()
 
-        print("=" * 60)
-        print("PYSPARK RAW LOAD & HARDWARE MONITORING")
-        print("=" * 60)
-        print(f"Host Hardware Info     : {gpu_info}")
-        print(f"Rows read              : {rows_read:,}")
-        print(f"Input partitions       : {input_partitions}")
-        print(f"Requested partitions   : {SPARK_PARTITIONS}")
-        print(f"Output partitions      : {output_partitions}")
-        print(f"Elapsed seconds        : {elapsed:.2f}")
-        print(f"Throughput             : {rows_read / elapsed if elapsed else 0:.2f} rows/s")
-        print(f"Master                 : {SPARK_MASTER_URL}")
-        print(f"Actual Spark master    : {spark.sparkContext.master}")
-        print(f"Application ID         : {application_id}")
-        print("=" * 60)
+        print("\033[96m" + "=" * 60 + "\033[0m")
+        print("\033[1m\033[92mPYSPARK RAW LOAD & HARDWARE MONITORING\033[0m")
+        print("\033[96m" + "=" * 60 + "\033[0m")
+        print(f"\033[97mHost Hardware Info     :\033[0m \033[95m{gpu_info}\033[0m")
+        print(f"\033[97mRows read              :\033[0m \033[96m{rows_read:,}\033[0m")
+        print(f"\033[97mInput partitions       :\033[0m \033[93m{input_partitions}\033[0m")
+        print(f"\033[97mRequested partitions   :\033[0m \033[96m{SPARK_PARTITIONS}\033[0m")
+        print(f"\033[97mOutput partitions      :\033[0m \033[92m{output_partitions}\033[0m")
+        print(f"\033[97mElapsed seconds        :\033[0m \033[93m{elapsed:.2f}s\033[0m")
+        print(f"\033[97mThroughput             :\033[0m \033[1m\033[92m{rows_read / elapsed if elapsed else 0:.2f} rows/s\033[0m")
+        print(f"\033[97mMaster                 :\033[0m \033[96m{SPARK_MASTER_URL}\033[0m")
+        print(f"\033[97mActual Spark master    :\033[0m \033[96m{spark.sparkContext.master}\033[0m")
+        print(f"\033[97mApplication ID         :\033[0m \033[95m{application_id}\033[0m")
+        print("\033[96m" + "=" * 60 + "\033[0m\n")
 
         return {
             "rows_read": rows_read,
             "raw_loaded": rows_read,
             "input_partitions": input_partitions,
             "output_partitions": output_partitions,
+            "partitions": output_partitions,
             "spark_partitions_requested": SPARK_PARTITIONS,
             "spark_master": SPARK_MASTER_URL,
             "actual_spark_master": spark.sparkContext.master,
@@ -226,19 +290,12 @@ def load_csv_to_raw(file_path: str | Path, run_id: str, engine_used: str = "pysp
             "throughput": rows_read / elapsed if elapsed else 0.0,
         }
     finally:
-        if spark is not None:
-            try:
-                spark.stop()
-            except Exception as exc:
-                logger.warning("Spark shutdown warning: %s", exc)
+        if close_spark and spark is not None:
+            stop_spark_quietly(spark)
 
 
 if __name__ == "__main__":
-    import sys
-    from uuid import uuid4
-    from config.settings import DATA_DIR, INPUT_FILE
-
-    huge_file = DATA_DIR / "orders_huge_mixed_quality.csv"
+    huge_file = HUGE_FILE
     if len(sys.argv) > 1:
         target = sys.argv[1]
     elif huge_file.exists():
@@ -248,4 +305,4 @@ if __name__ == "__main__":
 
     run_id = uuid4().hex
     print(f"Executing PySpark Loader on target file: {target}")
-    load_csv_to_raw(target, run_id)
+    load_csv_to_raw(target, run_id, close_spark=True)

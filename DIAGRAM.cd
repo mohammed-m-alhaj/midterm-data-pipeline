@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  =============================================================================
+  Data Pipeline Architecture & Class Diagram (.cd)
+  Project: Enterprise Hybrid Data Pipeline & Quality ELT Architecture
+  Course: Big Data Practical Midterm Project - Razi University
+  =============================================================================
+-->
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  
+  <!-- ==================== 1. CONFIGURATION LAYER ==================== -->
+  <Class Name="Config.Settings" Collapsed="false">
+    <Position X="0.5" Y="0.5" Width="3.2" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="false" />
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="SMALL_FILE_THRESHOLD_MB" Type="System.Int32" Value="200" />
+        <Field Name="BATCH_SIZE" Type="System.Int32" Value="2000" />
+        <Field Name="SPARK_PARTITIONS" Type="System.Int32" Value="16" />
+        <Field Name="MONGO_URI" Type="System.String" Value="mongodb://127.0.0.1:27017" />
+        <Field Name="MONGO_DATABASE" Type="System.String" Value="midterm_pipeline" />
+        <Field Name="RAW_COLLECTION" Type="System.String" Value="orders_raw" />
+        <Field Name="VALIDATED_COLLECTION" Type="System.String" Value="orders_validated" />
+        <Field Name="QUARANTINE_COLLECTION" Type="System.String" Value="orders_quarantine" />
+        <Field Name="RAW_COLUMNS" Type="System.Collections.Generic.List&lt;String&gt;" />
+        <Method Name="ensure_directories" ReturnType="System.Void" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <!-- ==================== 2. ROUTING & ORCHESTRATION ==================== -->
+  <Class Name="Src.FileRouter" Collapsed="false">
+    <Position X="4.2" Y="0.5" Width="3.0" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Method Name="route_file" ReturnType="System.Collections.Generic.Dictionary&lt;String, Object&gt;">
+          <Param Name="file_path" Type="System.String" />
+        </Method>
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <Class Name="Src.MainPipeline" Collapsed="false">
+    <Position X="4.2" Y="2.3" Width="3.0" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Method Name="parse_args" ReturnType="System.Object" />
+        <Method Name="main" ReturnType="System.Void" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <!-- ==================== 3. INGESTION ENGINES ==================== -->
+  <Class Name="Src.BatchLoader" Collapsed="false">
+    <Position X="0.5" Y="4.2" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Method Name="load_csv_to_raw" ReturnType="System.Collections.Generic.Dictionary&lt;String, Object&gt;">
+          <Param Name="file_path" Type="System.String" />
+          <Param Name="run_id" Type="System.String" />
+          <Param Name="engine_used" Type="System.String" Value="python_batch" />
+          <Param Name="batch_size" Type="System.Nullable&lt;Int32&gt;" />
+        </Method>
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <Class Name="Src.SparkLoader" Collapsed="false">
+    <Position X="4.5" Y="4.2" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Method Name="create_spark" ReturnType="PySpark.SQL.SparkSession" />
+        <Method Name="build_raw_schema" ReturnType="PySpark.SQL.Types.StructType" />
+        <Method Name="resolve_safe_spark_path" ReturnType="System.String" />
+        <Method Name="load_csv_to_raw" ReturnType="System.Collections.Generic.Dictionary&lt;String, Object&gt;">
+          <Param Name="file_path" Type="System.String" />
+          <Param Name="run_id" Type="System.String" />
+          <Param Name="engine_used" Type="System.String" Value="pyspark" />
+          <Param Name="partitions" Type="System.Nullable&lt;Int32&gt;" />
+        </Method>
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <!-- ==================== 4. DATA QUALITY RULES ENGINE (quality_rules.py) ==================== -->
+  <Class Name="Src.QualityRules" Collapsed="false">
+    <Position X="8.5" Y="0.5" Width="4.0" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="false" />
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="ARABIC_DIGITS" Type="System.Collections.Generic.Dictionary&lt;Char, Char&gt;" />
+        <Field Name="KNOWN_WORD_NUMBERS" Type="System.Collections.Generic.Dictionary&lt;String, String&gt;" />
+        <Field Name="ERROR_CODES" Type="System.Collections.Generic.HashSet&lt;String&gt;" />
+        <Method Name="normalize_number_text" ReturnType="System.String">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="to_decimal" ReturnType="System.Nullable&lt;Decimal&gt;">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="normalize_phone" ReturnType="System.String">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="normalize_email" ReturnType="System.Tuple&lt;String, Boolean&gt;">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="is_valid_email" ReturnType="System.Boolean">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="standardize_text" ReturnType="System.String">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="standardize_status" ReturnType="System.String">
+          <Param Name="value" Type="System.Object" />
+        </Method>
+        <Method Name="classify_errors" ReturnType="System.String">
+          <Param Name="error_codes" Type="System.Collections.Generic.List&lt;String&gt;" />
+        </Method>
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <!-- ==================== 5. ELT & TRANSFORMATION ENGINE (elt_pipeline.py) ==================== -->
+  <Class Name="Src.ELTPipeline" Collapsed="false">
+    <Position X="8.5" Y="4.5" Width="4.0" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="false" />
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="RAW_SCHEMA" Type="PySpark.SQL.Types.StructType" />
+        <Field Name="ITEM_SCHEMA" Type="PySpark.SQL.Types.ArrayType" />
+        <Field Name="CORRECTION_STRUCT" Type="PySpark.SQL.Types.StructType" />
+        <Field Name="ARABIC_TRANSLATION_FROM" Type="System.String" Value="٠١٢٣٤٥٦٧٨٩" />
+        <Field Name="ARABIC_TRANSLATION_TO" Type="System.String" Value="0123456789" />
+        <Method Name="money_expr" ReturnType="PySpark.SQL.Column">
+          <Param Name="column_name" Type="System.String" />
+        </Method>
+        <Method Name="standardize_phone_expr" ReturnType="PySpark.SQL.Column">
+          <Param Name="column_name" Type="System.String" />
+        </Method>
+        <Method Name="standardize_enum_expr" ReturnType="PySpark.SQL.Column">
+          <Param Name="column_name" Type="System.String" />
+        </Method>
+        <Method Name="correction" ReturnType="PySpark.SQL.Column">
+          <Param Name="field" Type="System.String" />
+          <Param Name="original" Type="PySpark.SQL.Column" />
+          <Param Name="corrected" Type="PySpark.SQL.Column" />
+          <Param Name="rule_code" Type="System.String" />
+        </Method>
+        <Method Name="non_null_array" ReturnType="PySpark.SQL.Column">
+          <Param Name="items" Type="System.Collections.Generic.List&lt;PySpark.SQL.Column&gt;" />
+        </Method>
+        <Method Name="error_array" ReturnType="PySpark.SQL.Column">
+          <Param Name="conditions" Type="System.Collections.Generic.List&lt;Tuple&lt;PySpark.SQL.Column, String&gt;&gt;" />
+        </Method>
+        <Method Name="process_run" ReturnType="System.Collections.Generic.Dictionary&lt;String, Object&gt;">
+          <Param Name="run_id" Type="System.String" />
+          <Param Name="source_file" Type="System.String" />
+        </Method>
+        <Method Name="get_latest_run_id" ReturnType="System.String" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <!-- ==================== 6. STORAGE & DATABASE LAYER ==================== -->
+  <Class Name="Src.MongoSetup" Collapsed="false">
+    <Position X="0.5" Y="7.0" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="false" />
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="VALIDATED_SCHEMA" Type="System.Collections.Generic.Dictionary&lt;String, Object&gt;" />
+        <Method Name="setup_mongodb" ReturnType="System.Void" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <Class Name="Src.MetricsTracker" Collapsed="false">
+    <Position X="4.5" Y="7.0" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="false" />
+      <Compartment Name="Methods" Collapsed="false" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="RESULTS_FILE" Type="System.String" Value="reports/results.json" />
+        <Method Name="append_run_metrics" ReturnType="System.Void">
+          <Param Name="metrics" Type="System.Collections.Generic.Dictionary&lt;String, Object&gt;" />
+        </Method>
+        <Method Name="read_metrics" ReturnType="System.Collections.Generic.List&lt;Dictionary&lt;String, Object&gt;&gt;" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <!-- ==================== 7. DATA MODELS / SCHEMAS ==================== -->
+  <Class Name="Models.OrdersRaw" Collapsed="false">
+    <Position X="0.5" Y="9.5" Width="3.0" />
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="run_id" Type="System.String" />
+        <Field Name="source_file" Type="System.String" />
+        <Field Name="source_row_number" Type="System.Int64" />
+        <Field Name="ingested_at" Type="System.DateTime" />
+        <Field Name="engine_used" Type="System.String" />
+        <Field Name="raw_record" Type="System.String" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <Class Name="Models.OrdersValidated" Collapsed="false">
+    <Position X="4.0" Y="9.5" Width="3.8" />
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="order_id" Type="System.String" />
+        <Field Name="order_date" Type="System.DateTime" />
+        <Field Name="status" Type="System.String" />
+        <Field Name="customer_id" Type="System.String" />
+        <Field Name="customer_name" Type="System.String" />
+        <Field Name="customer_phone" Type="System.String" />
+        <Field Name="customer_email" Type="System.String" />
+        <Field Name="city" Type="System.String" />
+        <Field Name="district" Type="System.String" />
+        <Field Name="delivery_type" Type="System.String" />
+        <Field Name="delivery_cost" Type="System.Double" />
+        <Field Name="payment_method" Type="System.String" />
+        <Field Name="payment_status" Type="System.String" />
+        <Field Name="payment_amount" Type="System.Double" />
+        <Field Name="total_amount" Type="System.Double" />
+        <Field Name="currency" Type="System.String" Value="YER" />
+        <Field Name="quality_status" Type="System.String" />
+        <Field Name="record_hash" Type="System.String" />
+        <Field Name="corrections" Type="System.Collections.Generic.List&lt;CorrectionEntry&gt;" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+  <Class Name="Models.OrdersQuarantine" Collapsed="false">
+    <Position X="8.2" Y="9.5" Width="3.8" />
+    <TypeIdentifier>
+      <HashCode>
+        <Field Name="run_id" Type="System.String" />
+        <Field Name="order_id" Type="System.String" />
+        <Field Name="error_codes" Type="System.Collections.Generic.List&lt;String&gt;" />
+        <Field Name="error_details" Type="System.String" />
+        <Field Name="quality_status" Type="System.String" Value="quarantine" />
+        <Field Name="raw_record" Type="System.String" />
+      </HashCode>
+    </TypeIdentifier>
+  </Class>
+
+</ClassDiagram>

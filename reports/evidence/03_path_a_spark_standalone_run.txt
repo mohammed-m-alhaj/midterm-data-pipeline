@@ -1,0 +1,66 @@
+﻿[96m=================================================================[0m
+[1m[92mMONGODB SETUP & JSON SCHEMA VALIDATION CONFIRMATION[0m
+[96m=================================================================[0m
+[97mDatabase              :[0m [96mmidterm_pipeline[0m
+[97mRaw collection        :[0m [92morders_raw[0m
+[97mValidated collection  :[0m [92morders_validated[0m
+[97mQuarantine collection :[0m [92morders_quarantine[0m
+[97mJSON Schema Validation:[0m [1m[92mENFORCED ($jsonSchema strict mode)[0m
+[97mSchema Required Fields:[0m [93morder_id, order_date, customer_id, items_json, quality_status, record_hash[0m
+[97mAllowed Currencies    :[0m [95m['YER', null][0m
+[97mAllowed Statuses      :[0m [95m['valid', 'corrected'][0m
+[97mUnique Validated Key  :[0m [1m[96muq_validated_order_id ON order_id (UNIQUE=TRUE)[0m
+[96m=================================================================[0m
+
+[96m======================================================================[0m
+[1m[92mHYBRID DATA PIPELINE - ROUTER & HARDWARE ACCELERATOR[0m
+[96m======================================================================[0m
+[97mGPU Accelerator :[0m [95mNVIDIA GeForce RTX 5070 Ti Laptop GPU, 12227 MiB [ACTIVE][0m
+[97mRun ID          :[0m [96m9381c4a1acdf49de9b4ccd63de4fd858[0m
+[97mFile            :[0m [97mC:\Users\Al-Haj\Desktop\midterm-data-pipeline\data\orders_1m_sample.csv[0m
+[97mFile size       :[0m [93m418.55 MB[0m
+[97mThreshold       :[0m [93m200 MB[0m
+[97mEngine          :[0m [1m[92mpyspark[0m
+[97mReason          :[0m [96mFile size (418.55 MB) > Config Threshold (200 MB)[0m
+[97mSpark master    :[0m [96mspark://127.0.0.1:7077[0m
+[96m======================================================================[0m
+
+== Parsed Logical Plan ==
+Repartition 16, true
++- Relation [order_id#0,order_date#1,status#2,customer_id#3,customer_name#4,customer_phone#5,customer_email#6,city#7,district#8,delivery_type#9,delivery_cost#10,payment_method#11,payment_status#12,payment_amount#13,currency#14,total_amount#15,items_json#16] csv
+
+== Analyzed Logical Plan ==
+order_id: string, order_date: string, status: string, customer_id: string, customer_name: string, customer_phone: string, customer_email: string, city: string, district: string, delivery_type: string, delivery_cost: string, payment_method: string, payment_status: string, payment_amount: string, currency: string, total_amount: string, items_json: string
+Repartition 16, true
++- Relation [order_id#0,order_date#1,status#2,customer_id#3,customer_name#4,customer_phone#5,customer_email#6,city#7,district#8,delivery_type#9,delivery_cost#10,payment_method#11,payment_status#12,payment_amount#13,currency#14,total_amount#15,items_json#16] csv
+
+== Optimized Logical Plan ==
+Repartition 16, true
++- Relation [order_id#0,order_date#1,status#2,customer_id#3,customer_name#4,customer_phone#5,customer_email#6,city#7,district#8,delivery_type#9,delivery_cost#10,payment_method#11,payment_status#12,payment_amount#13,currency#14,total_amount#15,items_json#16] csv
+
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=true
++- == Final Plan ==
+   ResultQueryStage 1
+   +- ShuffleQueryStage 0
+      +- Exchange RoundRobinPartitioning(16), REPARTITION_BY_NUM, [plan_id=9]
+         +- FileScan csv [order_id#0,order_date#1,status#2,customer_id#3,customer_name#4,customer_phone#5,customer_email#6,city#7,district#8,delivery_type#9,delivery_cost#10,payment_method#11,payment_status#12,payment_amount#13,currency#14,total_amount#15,items_json#16] Batched: false, DataFilters: [], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/Al-Haj/Desktop/midterm-data-pipeline/data/orders_1m_sam..., PartitionFilters: [], PushedFilters: [], ReadSchema: struct<order_id:string,order_date:string,status:string,customer_id:string,customer_name:string,cu...
++- == Initial Plan ==
+   Exchange RoundRobinPartitioning(16), REPARTITION_BY_NUM, [plan_id=9]
+   +- FileScan csv [order_id#0,order_date#1,status#2,customer_id#3,customer_name#4,customer_phone#5,customer_email#6,city#7,district#8,delivery_type#9,delivery_cost#10,payment_method#11,payment_status#12,payment_amount#13,currency#14,total_amount#15,items_json#16] Batched: false, DataFilters: [], Format: CSV, Location: InMemoryFileIndex(1 paths)[file:/C:/Users/Al-Haj/Desktop/midterm-data-pipeline/data/orders_1m_sam..., PartitionFilters: [], PushedFilters: [], ReadSchema: struct<order_id:string,order_date:string,status:string,customer_id:string,customer_name:string,cu...
+
+[96m============================================================[0m
+[1m[92mPYSPARK RAW LOAD & HARDWARE MONITORING[0m
+[96m============================================================[0m
+[97mHost Hardware Info     :[0m [95mNVIDIA GeForce RTX 5070 Ti Laptop GPU, 12227 MiB [ACTIVE][0m
+[97mRows read              :[0m [96m1,000,000[0m
+[97mInput partitions       :[0m [93m1[0m
+[97mRequested partitions   :[0m [96m16[0m
+[97mOutput partitions      :[0m [92m16[0m
+[97mElapsed seconds        :[0m [93m28.26s[0m
+[97mThroughput             :[0m [1m[92m35390.41 rows/s[0m
+[97mMaster                 :[0m [96mspark://127.0.0.1:7077[0m
+[97mActual Spark master    :[0m [96mspark://127.0.0.1:7077[0m
+[97mApplication ID         :[0m [95mapp-20260826001903-0000[0m
+[96m============================================================[0m
+

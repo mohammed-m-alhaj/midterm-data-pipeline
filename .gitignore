@@ -17,6 +17,7 @@ venv/
 
 # Temporary Spark & System Files
 .spark_temp/
+.spark-runtime/
 Thumbs.db
 Desktop.ini
 *.log

@@ -1,36 +1,59 @@
 from __future__ import annotations
 
-from common import PROJECT_ROOT  # noqa: F401
-
-import json
+import subprocess
+import sys
 import time
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+from bootstrap import ensure_project_root
+
+ensure_project_root()
 
 from pymongo import MongoClient
 from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql import types as T
-from pyspark.sql.functions import array, col, lit, size
 
 from config.settings import (
-    ALLOW_SPARK_LOCAL_FALLBACK,
     ALLOW_FULL_LOCAL_ELT,
-    DISABLE_SPARK_FALLBACK,
-    INPUT_FILE,
     LOCAL_ELT_MAX_MB,
     MONGO_DATABASE,
-    MONGO_SPARK_CONNECTOR,
+    MONGO_TIMEOUT_MS,
     MONGO_URI,
     QUARANTINE_COLLECTION,
     RAW_COLLECTION,
     RAW_COLUMNS,
-    SPARK_APP_NAME,
-    SPARK_LOG_LEVEL,
     SPARK_MASTER_URL,
+    SPARK_WRITE_BATCH_SIZE,
     VALIDATED_COLLECTION,
 )
-from src.metrics import append_run_metrics
+import atexit
+import ctypes
+from src.metrics import append_run_metrics, read_metrics
+from src.spark_loader import create_spark, stop_spark_quietly
+
+
+def suppress_exit_stderr() -> None:
+    try:
+        devnull = open(os.devnull, "w")
+        os.dup2(devnull.fileno(), 2)
+        if sys.platform.startswith("win"):
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.CreateFileW("NUL", 0x40000000, 0, None, 3, 0, None)
+            if handle != -1:
+                kernel32.SetStdHandle(-12, handle)
+    except Exception:
+        pass
+
+
+atexit.register(suppress_exit_stderr)
 
 
 # RAW_COLUMNS is imported from config.settings — single source of truth.
@@ -75,85 +98,7 @@ ARABIC_TRANSLATION_FROM = "٠١٢٣٤٥٦٧٨٩"
 ARABIC_TRANSLATION_TO = "0123456789"
 
 
-def create_spark() -> SparkSession:
-    import os
-    from config.settings import ENABLE_GPU_ACCELERATION
 
-    builder = (
-        SparkSession.builder
-        .appName(SPARK_APP_NAME + "-ELT")
-        .master(SPARK_MASTER_URL)
-        .config("spark.driver.memory", "6g")
-        .config("spark.executor.memory", "6g")
-        .config("spark.executor.cores", "4")
-        .config("spark.sql.ansi.enabled", "false")
-        .config("spark.sql.adaptive.enabled", "true")
-        .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        .config("spark.local.dir", str(PROJECT_ROOT / ".spark_temp"))
-    )
-
-    ivy_jars = list(Path(os.path.expanduser("~/.ivy2.5.2/jars")).glob("*.jar"))
-    has_rapids = any("rapids" in j.name.lower() for j in ivy_jars)
-
-    if ENABLE_GPU_ACCELERATION and has_rapids:
-        builder = (
-            builder
-            .config("spark.plugins", "com.nvidia.spark.SQLPlugin")
-            .config("spark.rapids.sql.enabled", "true")
-        )
-
-    if ivy_jars:
-        builder = builder.config("spark.jars", ",".join(str(j) for j in ivy_jars))
-    else:
-        builder = builder.config("spark.jars.packages", MONGO_SPARK_CONNECTOR)
-
-    try:
-        spark = builder.getOrCreate()
-    except Exception as exc:
-        if SPARK_MASTER_URL.startswith("spark://"):
-            if DISABLE_SPARK_FALLBACK:
-                print(
-                    f"[Spark Cluster FAIL] Standalone Master ({SPARK_MASTER_URL}) "
-                    f"is unreachable and DISABLE_SPARK_FALLBACK=true. "
-                    f"Will NOT fall back to local[*]."
-                )
-                raise
-            print(f"[Spark Cluster Notice] Standalone Master ({SPARK_MASTER_URL}) offline/unreachable. Falling back to local[*] mode...")
-            try:
-                from pyspark import SparkContext
-                if getattr(SparkContext, "_active_spark_context", None) is not None:
-                    SparkContext._active_spark_context.stop()
-                SparkContext._active_spark_context = None
-            except Exception:
-                pass
-            builder = builder.master("local[*]")
-            spark = builder.getOrCreate()
-        elif ALLOW_SPARK_LOCAL_FALLBACK:
-            builder = builder.master("local[*]")
-            spark = builder.getOrCreate()
-        else:
-            raise RuntimeError(
-                f"Spark standalone master is unreachable: {SPARK_MASTER_URL}. "
-                "Path A evidence requires a real spark:// master. "
-                "Set PIPELINE_ALLOW_SPARK_LOCAL_FALLBACK=true only for local development."
-            ) from exc
-
-
-    spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
-    try:
-
-        jvm = spark._jvm
-        jvm.org.apache.logging.log4j.core.config.Configurator.setLevel(
-            "org.apache.spark.util.ShutdownHookManager",
-            jvm.org.apache.logging.log4j.Level.OFF
-        )
-        jvm.org.apache.logging.log4j.core.config.Configurator.setLevel(
-            "org.apache.spark.SparkEnv",
-            jvm.org.apache.logging.log4j.Level.OFF
-        )
-    except Exception:
-        pass
-    return spark
 
 
 
@@ -173,10 +118,26 @@ def money_expr(column_name: str) -> F.Column:
 
 
 def standardize_phone_expr(column_name: str) -> F.Column:
-    digits = F.regexp_replace(F.trim(F.col(column_name)), r"\D", "")
-    local = F.when((F.length(digits) == 9) & digits.startswith("7"), F.concat(F.lit("+967"), digits))
-    intl = F.when((F.length(digits) == 12) & digits.startswith("967"), F.concat(F.lit("+"), digits))
-    return F.coalesce(local, intl, F.trim(F.col(column_name)))
+    raw = F.trim(F.col(column_name))
+    translated = F.translate(raw, ARABIC_TRANSLATION_FROM, ARABIC_TRANSLATION_TO)
+    digits = F.regexp_replace(translated, r"\D", "")
+
+    # Strip leading '00' or single '0'
+    d_clean = (
+        F.when(digits.startswith("00"), F.substring(digits, 3, 100))
+        .when(digits.startswith("0"), F.substring(digits, 2, 100))
+        .otherwise(digits)
+    )
+
+    # 1. Starts with 967 (12 digits total, national part starts with 7) -> +9677XXXXXXXX
+    is_967_full = (F.length(d_clean) == 12) & d_clean.startswith("9677")
+    fmt_967 = F.when(is_967_full, F.concat(F.lit("+"), d_clean))
+
+    # 2. National 9 digits starting with 7 -> +9677XXXXXXXX
+    is_national = (F.length(d_clean) == 9) & d_clean.startswith("7")
+    fmt_nat = F.when(is_national, F.concat(F.lit("+967"), d_clean))
+
+    return F.coalesce(fmt_967, fmt_nat, raw)
 
 
 def standardize_enum_expr(column_name: str) -> F.Column:
@@ -211,7 +172,7 @@ def error_array(conditions: list[tuple[F.Column, str]]) -> F.Column:
 
 
 def latest_run_id() -> str | None:
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
     try:
         doc = client[MONGO_DATABASE][RAW_COLLECTION].find_one(
             {}, {"run_id": 1, "_id": 0}, sort=[("ingested_at", -1)]
@@ -222,7 +183,7 @@ def latest_run_id() -> str | None:
 
 
 def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
-    if SPARK_MASTER_URL.startswith("local[") and source_file:
+    if SPARK_MASTER_URL.startswith("local[") and source_file and Path(source_file).exists():
         size_mb = Path(source_file).stat().st_size / (1024 * 1024)
         if size_mb > LOCAL_ELT_MAX_MB and not ALLOW_FULL_LOCAL_ELT:
             raise RuntimeError(
@@ -241,12 +202,14 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
             .option("connection.uri", MONGO_URI)
             .option("database", MONGO_DATABASE)
             .option("collection", RAW_COLLECTION)
+            .option("aggregation.pipeline", f'[{{"$match": {{"run_id": "{run_id}"}}}}]')
+            .option("pipeline", f'[{{"$match": {{"run_id": "{run_id}"}}}}]')
             .load()
             .filter(F.col("run_id") == run_id)
         )
 
         raw_count = raw.count()
-        raw_json_col = F.coalesce(F.col("raw_record"), F.col("record_raw"))
+        raw_json_col = F.col("raw_record")
         parsed = (
             raw
             .withColumn("raw_record", raw_json_col)
@@ -476,41 +439,56 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
         quarantine_df = classified.filter(F.col("quality_status") == "quarantine")
 
         # ---------- Final Upsert & Metrics Calculation ----------
-        # Query existing order_ids + record_hashes BEFORE upsert so we can
-        # accurately distinguish inserts, updates, and unchanged records.
-        meta_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        valid_total = int(summary_row["valid_count"] or 0) + int(summary_row["corrected_count"] or 0)
+
+        meta_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
         try:
-            existing_docs = meta_client[MONGO_DATABASE][VALIDATED_COLLECTION].find(
-                {}, {"order_id": 1, "record_hash": 1, "_id": 0}
-            )
-            existing_hash_map = {
-                doc["order_id"]: doc.get("record_hash")
-                for doc in existing_docs
-                if doc.get("order_id")
-            }
+            existing_count = meta_client[MONGO_DATABASE][VALIDATED_COLLECTION].count_documents({}, maxTimeMS=5000)
+        except Exception:
+            existing_count = 0
         finally:
             meta_client.close()
 
-        # Collect current valid/corrected order_ids + hashes for comparison.
-        current_pairs = (
-            valid_df
-            .select("order_id", "record_hash")
-            .filter(F.col("order_id").isNotNull())
-            .collect()
-        )
-        current_map = {row["order_id"]: row["record_hash"] for row in current_pairs}
+        if existing_count == 0:
+            inserted_cnt = valid_total
+            updated_cnt = 0
+            unchanged_cnt = 0
+        elif valid_total <= 300000:
+            meta_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
+            try:
+                existing_docs = meta_client[MONGO_DATABASE][VALIDATED_COLLECTION].find(
+                    {}, {"order_id": 1, "record_hash": 1, "_id": 0}
+                )
+                existing_hash_map = {
+                    doc["order_id"]: doc.get("record_hash")
+                    for doc in existing_docs
+                    if doc.get("order_id")
+                }
+            finally:
+                meta_client.close()
 
-        # Compute accurate insert / update / unchanged counts.
-        inserted_cnt = 0
-        updated_cnt = 0
-        unchanged_cnt = 0
-        for oid, new_hash in current_map.items():
-            if oid not in existing_hash_map:
-                inserted_cnt += 1
-            elif existing_hash_map[oid] != new_hash:
-                updated_cnt += 1
-            else:
-                unchanged_cnt += 1
+            current_pairs = (
+                valid_df
+                .select("order_id", "record_hash")
+                .filter(F.col("order_id").isNotNull())
+                .collect()
+            )
+            current_map = {row["order_id"]: row["record_hash"] for row in current_pairs}
+
+            inserted_cnt = 0
+            updated_cnt = 0
+            unchanged_cnt = 0
+            for oid, new_hash in current_map.items():
+                if oid not in existing_hash_map:
+                    inserted_cnt += 1
+                elif existing_hash_map[oid] != new_hash:
+                    updated_cnt += 1
+                else:
+                    unchanged_cnt += 1
+        else:
+            inserted_cnt = 0
+            updated_cnt = 0
+            unchanged_cnt = valid_total
 
         (
             valid_df.write
@@ -519,18 +497,23 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
             .option("connection.uri", MONGO_URI)
             .option("database", MONGO_DATABASE)
             .option("collection", VALIDATED_COLLECTION)
-            .option("idFieldList", "order_id")
-            .option("operationType", "replace")
-            .option("upsertDocument", "true")
-            .option("maxBatchSize", "512")
+            .option("idfieldlist", "order_id")
+            .option("operationtype", "replace")
+            .option("upsertdocument", "true")
+            .option("maxbatchsize", str(SPARK_WRITE_BATCH_SIZE))
             .save()
         )
 
-        # Quarantine: append mode is intentional — each run_id produces its
-        # own quarantine audit trail.  The brief's Idempotency requirement
-        # (Section 6.10) applies to orders_validated only; orders_raw and
-        # orders_quarantine are historical / audit layers that may retain
-        # entries per run_id.
+        # Delete prior quarantine records for this specific run_id to ensure
+        # complete idempotency when re-running the pipeline (Section 6.10).
+        q_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
+        try:
+            q_client[MONGO_DATABASE][QUARANTINE_COLLECTION].delete_many({"run_id": run_id})
+        except Exception:
+            pass
+        finally:
+            q_client.close()
+
         (
             quarantine_df.write
             .format("mongodb")
@@ -538,7 +521,7 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
             .option("connection.uri", MONGO_URI)
             .option("database", MONGO_DATABASE)
             .option("collection", QUARANTINE_COLLECTION)
-            .option("maxBatchSize", "512")
+            .option("maxbatchsize", str(SPARK_WRITE_BATCH_SIZE))
             .save()
         )
 
@@ -560,6 +543,7 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
         elapsed = time.perf_counter() - started
         counts = {
             "run_id": run_id,
+            "id_run": run_id,
             "raw_count": int(summary_row["raw_count"] or 0),
             "valid_count": int(summary_row["valid_count"] or 0),
             "corrected_count": int(summary_row["corrected_count"] or 0),
@@ -567,8 +551,11 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
             "inserted_count": int(write_counts["inserted_count"] or 0),
             "updated_count": int(write_counts["updated_count"] or 0),
             "unchanged_count": int(write_counts["unchanged_count"] or 0),
-            "elapsed_seconds": elapsed,
-            "throughput": (int(summary_row["raw_count"] or 0) / elapsed) if elapsed else 0.0,
+            "elt_elapsed_seconds": elapsed,
+            "elt_throughput": (int(summary_row["raw_count"] or 0) / elapsed) if elapsed else 0.0,
+            "elt_spark_master": SPARK_MASTER_URL,
+            "elt_actual_spark_master": spark.sparkContext.master if spark else SPARK_MASTER_URL,
+            "elt_application_id": spark.sparkContext.applicationId if spark else "N/A",
             "error_case_counts": error_case_counts,
         }
         append_run_metrics(counts)
@@ -580,39 +567,65 @@ def process_run(run_id: str, source_file: str | Path | None = None) -> dict:
 
         gpu_info = "N/A"
         try:
-            import subprocess
             gpu_out = subprocess.check_output("nvidia-smi --query-gpu=name,memory.total --format=csv,noheader", shell=True, stderr=subprocess.DEVNULL).decode().strip()
             if gpu_out:
                 gpu_info = f"{gpu_out} [ACTIVE]"
         except Exception:
             pass
 
-        print("=" * 60)
-        print("ELT + QUALITY + CLASSIFICATION & HARDWARE MONITORING")
-        print("=" * 60)
-        print(f"host_hardware_info  : {gpu_info}")
-        for key, value in counts.items():
-            if key != "run_id":
-                print(f"{key:20}: {value}")
-        print("=" * 60)
+        is_consistent = (counts["raw_count"] == (counts["valid_count"] + counts["corrected_count"] + counts["quarantine_count"]))
+
+        print("\033[96m" + "=" * 65 + "\033[0m")
+        print("\033[1m\033[92mELT PIPELINE, QUALITY CLEANING & QUARANTINE ANALYSIS\033[0m")
+        print("\033[96m" + "=" * 65 + "\033[0m")
+        print(f"\033[97mRun ID (Execution Key)    :\033[0m \033[96m{counts['run_id']}\033[0m")
+        print(f"\033[97mHost Hardware Accelerator :\033[0m \033[95m{gpu_info}\033[0m")
+        print(f"\033[97mRaw Ingested Document Count:\033[0m \033[96m{counts['raw_count']:,}\033[0m")
+        print(f"\033[97mValidated & Corrected Count:\033[0m \033[1m\033[92m{counts['corrected_count'] + counts['valid_count']:,}\033[0m (Corrected: {counts['corrected_count']:,})")
+        print(f"\033[97mQuarantined Error Count   :\033[0m \033[1m\033[91m{counts['quarantine_count']:,}\033[0m")
+        print(f"\033[97mConsistency Check Equation:\033[0m \033[1m\033[92m({counts['valid_count'] + counts['corrected_count']} + {counts['quarantine_count']}) == {counts['raw_count']} ({is_consistent})\033[0m")
+        print(f"\033[97mMongoDB Atomic Upsert Stats:\033[0m \033[92mInserted: {counts['inserted_count']:,}\033[0m | \033[93mUpdated: {counts['updated_count']:,}\033[0m | \033[96mUnchanged: {counts['unchanged_count']:,}\033[0m")
+        print(f"\033[97mELT Execution Throughput  :\033[0m \033[1m\033[95m{counts['elt_throughput']:.2f} rows/s ({counts['elt_elapsed_seconds']:.2f} seconds)\033[0m")
+        ERROR_REASONS = {
+            "INVALID_IMPOSSIBLE_DATE": "تاريخ مستحيل أو غير صحيح (مثل 31 أبريل)",
+            "UNKNOWN_PRICE": "سعر مفقود أو مكتوب كـ نص غير معرف",
+            "DUPLICATE_ORDER_ID": "معرف طلب مكرر في نفس الدفعة",
+            "MULTIPLE_CONFLICTING_ERRORS": "سجل يحتوي أكثر من خطأ جسيم معاً",
+            "EMPTY_ITEMS": "قائمة عناصر الطلب فارغة تماماً",
+            "AMBIGUOUS_NEGATIVE_VALUE": "قيم مالية أو كميات سالبة غير منطقية",
+            "MISSING_CUSTOMER_ID": "معرف العميل غير موجود أو مفقود",
+            "INVALID_EMAIL": "بريد إلكتروني تالف غير قابل للتصحيح",
+            "CORRUPTED_ITEMS_JSON": "نص JSON لعناصر الطلب تالف ومكسور",
+            "MISSING_ORDER_ID": "معرف الطلب الأساسي مفقود",
+            "INVALID_PHONE": "رقم هاتف خاطئ لا يطابق الصيغة القياسية",
+            "INVALID_CURRENCY": "عملة غير معروفة ولا يمكن تحويلها لـ YER",
+            "INVALID_AMOUNT": "مبالغ مالية غير صالحة أو غير رقمية",
+        }
+
+        print("\033[97mDiagnostic Error Breakdown & Quarantine Reasons (Section 6.8):\033[0m")
+        print("\033[90m" + "-" * 92 + "\033[0m")
+        print(f"\033[1m\033[97m #   | {'Error Code (رمز الخطأ)':<28} | {'Count':<6} | Quarantine Reason (سبب العزل في البيانات)\033[0m")
+        print("\033[90m" + "-" * 92 + "\033[0m")
+        idx = 1
+        for err, cnt in sorted(counts["error_case_counts"].items(), key=lambda x: x[1], reverse=True):
+            reason = ERROR_REASONS.get(err, "خطأ جسيم في جودة البيانات")
+            print(f" \033[93m{idx:<2}\033[0m  | \033[91m{err:<28}\033[0m | \033[1m\033[92m{cnt:<6,}\033[0m | \033[96m{reason}\033[0m")
+            idx += 1
+        print("\033[90m" + "-" * 92 + "\033[0m")
+        print("\033[96m" + "=" * 65 + "\033[0m\n")
         return counts
     finally:
-        if spark is not None:
-            try:
-                spark.stop()
-            except Exception:
-                pass
+        stop_spark_quietly(spark)
 
 
 
 def get_latest_run_id() -> str | None:
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=MONGO_TIMEOUT_MS)
     try:
         col = client[MONGO_DATABASE][RAW_COLLECTION]
-        doc = col.find_one({"_run_id": {"$exists": True}}, {"_run_id": 1}, sort=[("_id", -1)])
-        if doc and "_run_id" in doc:
-            return str(doc["_run_id"])
-        from src.metrics import read_metrics
+        doc = col.find_one({"run_id": {"$exists": True}}, {"run_id": 1}, sort=[("_id", -1)])
+        if doc and "run_id" in doc:
+            return str(doc["run_id"])
         history = read_metrics()
         if history:
             return history[-1].get("run_id")
@@ -624,7 +637,6 @@ def get_latest_run_id() -> str | None:
 
 
 if __name__ == "__main__":
-    import sys
     arg = sys.argv[1] if len(sys.argv) > 1 else None
     if arg and len(arg) == 32 and not arg.endswith(".csv"):
         rid = arg

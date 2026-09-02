@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import argparse
-import sys
 
-from common import PROJECT_ROOT  # noqa: F401
+from bootstrap import ensure_project_root
+
+ensure_project_root()
 
 from config.settings import (
     ALLOW_FULL_LOCAL_ELT,
@@ -15,9 +16,10 @@ from config.settings import (
     SPARK_MASTER_URL,
     ensure_directories,
 )
+from src.common import get_gpu_info
 from src.file_router import route_file
-from src.mongo_setup import setup_mongodb
 from src.metrics import append_run_metrics
+from src.mongo_setup import setup_mongodb
 
 
 def parse_args() -> argparse.Namespace:
@@ -48,27 +50,20 @@ def main() -> None:
     # ------------------------------------------------------------------
     decision = route_file(input_file)
 
-    gpu_info = "N/A"
-    try:
-        import subprocess
-        gpu_out = subprocess.check_output("nvidia-smi --query-gpu=name,memory.total --format=csv,noheader", shell=True, stderr=subprocess.DEVNULL).decode().strip()
-        if gpu_out:
-            gpu_info = f"{gpu_out} [ACTIVE]"
-    except Exception:
-        pass
+    gpu_info = get_gpu_info()
 
-    print("=" * 70)
-    print("HYBRID DATA PIPELINE - ROUTER & HARDWARE ACCELERATOR")
-    print("=" * 70)
-    print(f"GPU Accelerator : {gpu_info}")
-    print(f"Run ID          : {decision['run_id']}")
-    print(f"File            : {decision['file_path']}")
-    print(f"File size       : {decision['file_size_mb']:.2f} MB")
-    print(f"Threshold       : {decision['threshold_mb']} MB")
-    print(f"Engine          : {decision['engine']}")
-    print(f"Reason          : {decision['reason']}")
-    print(f"Spark master    : {SPARK_MASTER_URL}")
-    print("=" * 70)
+    print("\033[96m" + "=" * 70 + "\033[0m")
+    print("\033[1m\033[92mHYBRID DATA PIPELINE - ROUTER & HARDWARE ACCELERATOR\033[0m")
+    print("\033[96m" + "=" * 70 + "\033[0m")
+    print(f"\033[97mGPU Accelerator :\033[0m \033[95m{gpu_info}\033[0m")
+    print(f"\033[97mRun ID          :\033[0m \033[96m{decision['run_id']}\033[0m")
+    print(f"\033[97mFile            :\033[0m \033[97m{decision['file_path']}\033[0m")
+    print(f"\033[97mFile size       :\033[0m \033[93m{decision['file_size_mb']:.2f} MB\033[0m")
+    print(f"\033[97mThreshold       :\033[0m \033[93m{decision['threshold_mb']} MB\033[0m")
+    print(f"\033[97mEngine          :\033[0m \033[1m\033[92m{decision['engine']}\033[0m")
+    print(f"\033[97mReason          :\033[0m \033[96m{decision['reason']}\033[0m")
+    print(f"\033[97mSpark master    :\033[0m \033[96m{SPARK_MASTER_URL}\033[0m")
+    print("\033[96m" + "=" * 70 + "\033[0m\n")
 
     if decision["engine"] == "python_batch":
         from src.batch_loader import load_csv_to_raw
@@ -117,17 +112,16 @@ def main() -> None:
         if too_large_for_local:
 
             print(
-                f"ELT deferred: full local processing is disabled "
-                f"for files above {LOCAL_ELT_MAX_MB} MB."
+                f"\033[93mELT deferred: full local processing is disabled "
+                f"for files above {LOCAL_ELT_MAX_MB} MB.\033[0m"
             )
 
             print(
-                "Use the 100k/1M benchmark locally or run the "
-                "full ELT on Path A Spark Standalone."
+                "\033[93mUse the 100k/1M benchmark locally or run the "
+                "full ELT on Path A Spark Standalone.\033[0m"
             )
 
         else:
-
             from src.elt_pipeline import process_run
 
             process_run(
@@ -138,11 +132,11 @@ def main() -> None:
     else:
 
         print(
-            "ELT skipped because "
-            "PIPELINE_RUN_ELT_AFTER_RAW=false"
+            "\033[93mELT skipped because "
+            "PIPELINE_RUN_ELT_AFTER_RAW=false\033[0m"
         )
 
-    print("Pipeline completed.")
+    print("\033[1m\033[92mPipeline completed successfully.\033[0m\n")
 
 
 if __name__ == "__main__":
