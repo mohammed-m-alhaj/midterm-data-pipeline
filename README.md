@@ -774,25 +774,23 @@ erDiagram
 
 ---
 
-## 📸 لقطات الإثبات
+## 📸 لقطات الإثبات والتشغيل الفعلي لكافة المراحل
 
-كافة لقطات الإثبات (13 لقطة) في مجلد `reports/screenshots/`:
+لقطات شاشة توثيقية حقيقية وعالية الدقة تم التقاطها أثناء تنفيذ واختبار كل مرحلة، ومحفوظة في مجلد `reports/screenshots/`:
 
-| # | اللقطة | الوصف |
-|---|--------|-------|
-| 01 | `01_master_worker_alive.png` | Spark Master + Worker = ALIVE |
-| 02 | `02_spark_application.png` | Spark Application أثناء التشغيل |
-| 03 | `03_executors.png` | حالة الـ Executors |
-| 04 | `04_jobs_stages_tasks.png` | Jobs, Stages, Tasks |
-| 05 | `05_repartition_explain.png` | خطة التقسيم (Execution Plan) |
-| 06 | `06_mongodb_raw.png` | بيانات orders_raw |
-| 07 | `07_mongodb_validated.png` | بيانات orders_validated |
-| 08 | `08_mongodb_quarantine.png` | بيانات orders_quarantine |
-| 09 | `09_idempotency_run1.png` | التشغيل الأول (Insert) |
-| 10 | `10_idempotency_run2.png` | التشغيل الثاني (Zero Duplicates) |
-| 11 | `11_update_evidence.png` | إثبات Upsert |
-| 12 | `12_python_batch_streaming.png` | Python Batch Streaming |
-| 13 | `13_quality_rules_proof.png` | إثبات قواعد الجودة |
+| # | المرحلة | ملف الصورة | الوصف الفني والمعاينة |
+|---|---------|------------|-----------------------|
+| 01 | **موجه الملفات (الملف الصغير)** | [`01_router_small_file_python_batch.png`](reports/screenshots/01_router_small_file_python_batch.png) | اختيار محرك Python Batch تلقائياً للملفات ≤ 200MB مع تبرير القرار |
+| 02 | **موجه الملفات (الملف الكبير)** | [`02_router_large_file_pyspark.png`](reports/screenshots/02_router_large_file_pyspark.png) | اختيار محرك PySpark تلقائياً للملفات > 200MB وتوزيعها على العنقود |
+| 03 | **التحميل التدفقي بالبايثون** | [`03_python_batch_streaming.png`](reports/screenshots/03_python_batch_streaming.png) | تدفق الدفعات بالذاكرة O(1) ومعدل السرعة القياسي (31,338 rows/s) |
+| 04 | **طبقة التخزين الخام** | [`04_mongodb_orders_raw.png`](reports/screenshots/04_mongodb_orders_raw.png) | حفظ السجلات كاملة في orders_raw دون تصفية مع سلالة البيانات run_id |
+| 05 | **قواعد الجودة والتنظيف** | [`05_quality_rules_cleaning.png`](reports/screenshots/05_quality_rules_cleaning.png) | اختبار وإثبات نجاح القواعد الـ 9 الحتمية لمعالجة الأرقام والأسعار والبريد |
+| 06 | **السجلات السليمة وسجل التدقيق** | [`06_mongodb_orders_validated.png`](reports/screenshots/06_mongodb_orders_validated.png) | وثيقة من orders_validated توضح مصفوفة corrections وتجزئة SHA-256 |
+| 07 | **طبقة العزل وتصنيف الأخطاء** | [`07_mongodb_orders_quarantine.png`](reports/screenshots/07_mongodb_orders_quarantine.png) | جدول تشخيص 13 رمز خطأ وأسباب العزل مع نسبة فقدان 0.00% |
+| 08 | **إثبات اللاتكرارية (Idempotency)** | [`08_idempotency_upsert_proof.png`](reports/screenshots/08_idempotency_upsert_proof.png) | إثبات إعادة التشغيل: 0 إدراج جديد، 41 تحديث، 4,213 غير معدل |
+| 09 | **الاختبارات الآلية (PyTest)** | [`09_automated_tests_pytest.png`](reports/screenshots/09_automated_tests_pytest.png) | نجاح 15/15 اختبار بنسبة 100% في 0.02 ثانية |
+| 10 | **معمارية عنقود Spark (Path A)** | [`10_spark_cluster_architecture.png`](reports/screenshots/10_spark_cluster_architecture.png) | تشغيل Master و Worker وتوزيع 16 Partition على أنوية المعالجة |
+| 11 | **لوحة مقاييس الأداء والاتساق** | [`11_pipeline_metrics_summary.png`](reports/screenshots/11_pipeline_metrics_summary.png) | ملخص المقاييس، زمن التنفيذ، ومعادلة اتساق الدفعة run consistency |
 
 ---
 

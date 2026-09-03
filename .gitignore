@@ -28,5 +28,6 @@ data/*.csv
 !data/orders_test_5k.csv
 
 # Reports & Screenshots
-reports/screenshots/*
+reports/screenshots/*.tmp
+!reports/screenshots/*.png
 !reports/screenshots/.gitkeep
