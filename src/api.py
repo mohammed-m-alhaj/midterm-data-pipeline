@@ -88,7 +88,7 @@ app = FastAPI(
 # Pydantic Request & Response Models
 # ---------------------------------------------------------------------------
 class IngestRequest(BaseModel):
-    file_path: str = Field(..., description="Absolute or relative path to CSV file.")
+    file_path: Optional[str] = Field(None, description="Absolute or relative path to CSV file. Defaults to sample CSV if omitted.")
     run_elt: bool = Field(True, description="Whether to execute ELT cleaning phase immediately after Raw Load.")
 
 
@@ -135,14 +135,29 @@ def get_health() -> Dict[str, Any]:
 # 2. Ingest Data via Phase 1 Pipeline
 # ---------------------------------------------------------------------------
 @app.post("/ingest", tags=["Data Ingestion"], summary="Ingest CSV using Phase 1 File Router")
-def ingest_file(req: IngestRequest) -> Dict[str, Any]:
+def ingest_file(req: Optional[IngestRequest] = None) -> Dict[str, Any]:
     """
     Ingests CSV file by strictly calling Phase 1 File Router, selecting engine
     (Python Batch or PySpark), and executing ELT quality pipeline.
     """
-    target_path = Path(req.file_path)
-    if not target_path.is_absolute():
-        target_path = PROJECT_ROOT / target_path
+    if req is None:
+        req = IngestRequest()
+
+    if not req.file_path:
+        default_file = PROJECT_ROOT / "data" / "test_1_small_clean.csv"
+        if default_file.is_file():
+            target_path = default_file
+        else:
+            candidates = list((PROJECT_ROOT / "data").glob("*.csv"))
+            if candidates:
+                target_path = candidates[0]
+            else:
+                from src.generate_phase2_dynamic_dataset import generate_dynamic_dataset
+                target_path = generate_dynamic_dataset(300)
+    else:
+        target_path = Path(req.file_path)
+        if not target_path.is_absolute():
+            target_path = PROJECT_ROOT / target_path
 
     if not target_path.is_file():
         raise HTTPException(
@@ -383,11 +398,13 @@ def execute_aggregation(
 # 6. Materialized Views & Incremental Refresh
 # ---------------------------------------------------------------------------
 @app.post("/refresh-mv", tags=["Materialized Views"], summary="Refresh Materialized Views")
-def trigger_refresh_mv(req: RefreshMVRequest) -> Dict[str, Any]:
+def trigger_refresh_mv(req: Optional[RefreshMVRequest] = None) -> Dict[str, Any]:
     """
     Triggers an incremental or full refresh of registered Materialized Views.
     Supports incremental partial sync using delta watermarks.
     """
+    if req is None:
+        req = RefreshMVRequest()
     try:
         view = req.view_name
         if view in (MV_DAILY_SALES, "daily_sales_summary"):

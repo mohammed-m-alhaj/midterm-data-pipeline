@@ -265,7 +265,8 @@ midterm-data-pipeline/
 │   ├── phase2_analysis.md       # التحليل المعماري الشامل والدفاع عن Phase 2
 │   ├── requirements_mapping.md  # ربط كل متطلب رسمي بالكود المنفذ
 │   └── demo_checklist.md        # قائمة التحقق التفصيلية لجلسة المناقشة
-├── example.env                  # نموذج متغيرات البيئة النظيف والآمن
+├── .env.example                  # نموذج متغيرات البيئة النظيف والآمن (المطلوب رسمياً)
+├── example.env                  # نموذج متغيرات البيئة النظيف البديل
 ├── pytest.ini                   # ضبط مسارات واستكشاف الاختبارات الآلية
 ├── requirements.txt             # حزمة المكتبات المطلوبة للمشروع
 └── README.md                    # دليل التوثيق الشامل لكافة مراحل المشروع
@@ -298,7 +299,8 @@ python -m venv .venv
 pip install -r requirements.txt
 
 # 4. نسخ ملف متغيرات البيئة النظيف
-Copy-Item example.env .env
+Copy-Item .env.example .env    # أو Copy-Item example.env .env
+# cp .env.example .env         # على أنظمة Linux / macOS
 
 # 5. التأكد من اتصال قاعدة بيانات MongoDB
 mongosh --eval "db.runCommand({ping: 1})"
@@ -612,7 +614,7 @@ flowchart TD
 
 ## ⚙️ 12. جدول متغيرات البيئة وإعدادات الأمان
 
-يتم ضبط إعدادات المشروع بالكامل عبر ملف `.env` (المطابق تماماً لنموذج [`example.env`](example.env) وكود [`config/settings.py`](config/settings.py) دون أي بيانات حساسة أو مفاتيح سرية):
+يتم ضبط إعدادات المشروع بالكامل عبر ملف `.env` (المطابق تماماً لنموذج [`.env.example`](.env.example) و [`example.env`](example.env) وكود [`config/settings.py`](config/settings.py) دون أي بيانات حساسة أو مفاتيح سرية):
 
 | المتغير البرمجي في `.env` | القيمة الافتراضية | الوصف الفني والغرض في النظام |
 |---|---|---|
@@ -667,7 +669,7 @@ flowchart TD
 | 3 | **الجداول المجمعة (Materialized Views)** | 1.5 | `daily_sales_summary` و `top_products_summary` مع تحديث تزايدي ذكي بالـ Watermark و $merge | [`reports/phase2_evidence/materialized_views_evidence.json`](reports/phase2_evidence/materialized_views_evidence.json) |
 | 4 | **المهام المجدولة (Scheduled Jobs)** | 1.0 | مهمتان حقيقيتان + Background Scheduler + تشغيل يدوي + سجلات أخطاء | [`reports/phase2_evidence/jobs_execution_logs.json`](reports/phase2_evidence/jobs_execution_logs.json) |
 | 5 | **واجهة FastAPI الموحدة** | 0.75 | 10 Endpoints موثقة بـ Swagger + استدعاء موجه ومحرك Phase 1 مباشرة | [`reports/phase2_evidence/api_endpoints_test_results.json`](reports/phase2_evidence/api_endpoints_test_results.json) |
-| 6 | **التوثيق والبيئة و GitHub** | 0.5 | توثيق متكامل وشامل + example.env نظيف + requirements.txt | [`README.md`](README.md) و [`example.env`](example.env) |
+| 6 | **التوثيق والبيئة و GitHub** | 0.5 | توثيق متكامل وشامل + .env.example نظيف + requirements.txt | [`README.md`](README.md) و [`.env.example`](.env.example) |
 | 7 | **المناقشة والفهم المعماري** | 0.25 | تحليل مبررات الفهارس وقاعدة ESR والتحديث التزايدي والـ Aggregations | [`docs/phase2_analysis.md`](docs/phase2_analysis.md) |
 
 **🏆 المجموع التراكمي الإجمالي للمشروع: 18.0 (النصفي) + 7.0 (النهائي) = 25.0 / 25.0 درجة (100% الدرجة الكاملة المؤكدة)**

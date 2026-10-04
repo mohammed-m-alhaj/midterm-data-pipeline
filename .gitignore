@@ -25,6 +25,7 @@ Desktop.ini
 
 # Large CSV Datasets (GitHub 100MB Limit Guard)
 data/*.csv
+!data/test_1_small_clean.csv
 !data/orders_test_5k.csv
 
 # Reports & Screenshots
