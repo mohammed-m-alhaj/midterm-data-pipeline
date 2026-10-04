@@ -1,0 +1,17 @@
+{
+  "url": "http://127.0.0.1:8000/health",
+  "status_code": 200,
+  "response_json": {
+    "status": "HEALTHY",
+    "database": "midterm_pipeline",
+    "mongo_uri": "mongodb://127.0.0.1:27017",
+    "collections_status": {
+      "orders_raw": 1141,
+      "orders_validated": 541,
+      "orders_quarantine": 3,
+      "mv_daily_sales_summary": 170,
+      "mv_customer_metrics": 182
+    },
+    "scheduler_active": true
+  }
+}

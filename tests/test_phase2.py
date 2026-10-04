@@ -101,13 +101,48 @@ def test_phase2_jobs():
     assert len(logs) >= 2
 
 
-def test_phase2_api_endpoints(client: TestClient):
-    # Health
+def test_phase2_api_endpoints(client: TestClient, tmp_path):
+    import csv
+    import json
+    from config.settings import RAW_COLUMNS
+
+    # 1. Health
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json()["status"] == "HEALTHY"
 
-    # Indexes
+    # 2. POST /ingest
+    csv_file = tmp_path / "test_api_ingest.csv"
+    row = {col: "test" for col in RAW_COLUMNS}
+    row["order_id"] = "API-TEST-001"
+    row["order_date"] = "2026-05-01"
+    row["status"] = "مؤكد"
+    row["customer_id"] = "CUST-API-01"
+    row["customer_name"] = "عميل تجريبي"
+    row["customer_phone"] = "+967771234567"
+    row["customer_email"] = "test@domain.com"
+    row["city"] = "صنعاء"
+    row["district"] = "السبعين"
+    row["delivery_type"] = "سريع"
+    row["delivery_cost"] = "1000"
+    row["payment_method"] = "كاش"
+    row["payment_status"] = "تم الدفع"
+    row["payment_amount"] = "5000"
+    row["currency"] = "YER"
+    row["total_amount"] = "6000"
+    row["items_json"] = json.dumps([{"sku": "SKU-1", "name": "Item", "qty": 1, "unit_price": 5000.0, "total": 5000.0}])
+    with open(csv_file, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=RAW_COLUMNS)
+        writer.writeheader()
+        writer.writerow(row)
+
+    r_ingest = client.post("/ingest", json={"file_path": str(csv_file), "run_elt": True})
+    assert r_ingest.status_code == 200
+    assert r_ingest.json()["status"] == "COMPLETED"
+    assert r_ingest.json()["decision"]["engine"] == "python_batch"
+    assert r_ingest.json()["load_stats"]["raw_loaded"] == 1
+
+    # 3. Indexes
     r = client.post("/indexes")
     assert r.status_code == 200
 
