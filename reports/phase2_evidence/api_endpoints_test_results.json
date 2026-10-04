@@ -6,10 +6,10 @@
       "database": "midterm_pipeline",
       "mongo_uri": "mongodb://127.0.0.1:27017",
       "collections_status": {
-        "orders_raw": 992,
-        "orders_validated": 986,
+        "orders_raw": 1389,
+        "orders_validated": 1380,
         "orders_quarantine": 0,
-        "mv_daily_sales_summary": 180,
+        "mv_daily_sales_summary": 182,
         "mv_customer_metrics": 182
       },
       "scheduler_active": false
@@ -199,7 +199,7 @@
   },
   "GET /queries/orders_by_city_status": {
     "status_code": 200,
-    "count": 45
+    "count": 50
   },
   "GET /queries/orders_by_city_status?explain=true": {
     "status_code": 200,

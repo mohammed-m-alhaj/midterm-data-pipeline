@@ -8,29 +8,40 @@
     },
     "before_index": {
       "executionSuccess": true,
-      "nReturned": 45,
+      "nReturned": 50,
       "executionTimeMillis": 1,
       "totalKeysExamined": 0,
-      "totalDocsExamined": 986,
-      "stage": "SORT",
-      "outerStage": "PROJECTION_SIMPLE",
+      "totalDocsExamined": 1380,
+      "stage": "COLLSCAN → SORT",
+      "primaryScan": "COLLSCAN",
+      "stages": [
+        "PROJECTION_SIMPLE",
+        "SORT",
+        "COLLSCAN"
+      ],
       "indexName": null
     },
     "after_index": {
       "executionSuccess": true,
-      "nReturned": 45,
+      "nReturned": 50,
       "executionTimeMillis": 6,
-      "totalKeysExamined": 45,
-      "totalDocsExamined": 45,
-      "stage": "LIMIT",
-      "outerStage": "LIMIT",
-      "indexName": null
+      "totalKeysExamined": 50,
+      "totalDocsExamined": 50,
+      "stage": "IXSCAN → FETCH → LIMIT",
+      "primaryScan": "IXSCAN",
+      "stages": [
+        "LIMIT",
+        "PROJECTION_SIMPLE",
+        "FETCH",
+        "IXSCAN"
+      ],
+      "indexName": "idx_city_status_total_amount"
     },
     "performance_gain": {
       "time_saved_ms": -5,
-      "docs_examined_reduction": 941,
-      "docs_ratio": 21.91,
-      "stage_transition": "SORT -> LIMIT"
+      "docs_examined_reduction": 1330,
+      "docs_ratio": 27.6,
+      "stage_transition": "COLLSCAN → SORT -> IXSCAN → FETCH → LIMIT"
     },
     "raw_explain_before": {
       "explainVersion": "1",
@@ -106,18 +117,18 @@
       },
       "executionStats": {
         "executionSuccess": true,
-        "nReturned": 45,
+        "nReturned": 50,
         "executionTimeMillis": 1,
         "totalKeysExamined": 0,
-        "totalDocsExamined": 986,
+        "totalDocsExamined": 1380,
         "executionStages": {
           "isCached": false,
           "stage": "PROJECTION_SIMPLE",
-          "nReturned": 45,
+          "nReturned": 50,
           "executionTimeMillisEstimate": 0,
-          "works": 1033,
-          "advanced": 45,
-          "needTime": 987,
+          "works": 1432,
+          "advanced": 50,
+          "needTime": 1381,
           "needYield": 0,
           "saveState": 0,
           "restoreState": 0,
@@ -133,11 +144,11 @@
           },
           "inputStage": {
             "stage": "SORT",
-            "nReturned": 45,
+            "nReturned": 50,
             "executionTimeMillisEstimate": 0,
-            "works": 1033,
-            "advanced": 45,
-            "needTime": 987,
+            "works": 1432,
+            "advanced": 50,
+            "needTime": 1381,
             "needYield": 0,
             "saveState": 0,
             "restoreState": 0,
@@ -150,13 +161,13 @@
             "memLimit": 104857600,
             "limitAmount": 50,
             "type": "simple",
-            "totalDataSizeSorted": 101220,
+            "totalDataSizeSorted": 111068,
             "usedDisk": false,
             "spills": 0,
             "spilledRecords": 0,
             "spilledBytes": 0,
             "spilledDataStorageSize": 0,
-            "peakTrackedMemBytes": 101220,
+            "peakTrackedMemBytes": 112183,
             "inputStage": {
               "stage": "COLLSCAN",
               "filter": {
@@ -173,18 +184,18 @@
                   }
                 ]
               },
-              "nReturned": 45,
+              "nReturned": 66,
               "executionTimeMillisEstimate": 0,
-              "works": 987,
-              "advanced": 45,
-              "needTime": 941,
+              "works": 1381,
+              "advanced": 66,
+              "needTime": 1314,
               "needYield": 0,
               "saveState": 0,
               "restoreState": 0,
               "isEOF": 1,
               "nss": "midterm_pipeline.orders_validated",
               "direction": "forward",
-              "docsExamined": 986
+              "docsExamined": 1380
             }
           }
         },
@@ -319,17 +330,17 @@
       },
       "executionStats": {
         "executionSuccess": true,
-        "nReturned": 45,
+        "nReturned": 50,
         "executionTimeMillis": 6,
-        "totalKeysExamined": 45,
-        "totalDocsExamined": 45,
+        "totalKeysExamined": 50,
+        "totalDocsExamined": 50,
         "executionStages": {
           "isCached": false,
           "stage": "LIMIT",
-          "nReturned": 45,
-          "executionTimeMillisEstimate": 0,
-          "works": 46,
-          "advanced": 45,
+          "nReturned": 50,
+          "executionTimeMillisEstimate": 5,
+          "works": 51,
+          "advanced": 50,
           "needTime": 0,
           "needYield": 0,
           "saveState": 0,
@@ -338,15 +349,15 @@
           "limitAmount": 50,
           "inputStage": {
             "stage": "PROJECTION_SIMPLE",
-            "nReturned": 45,
-            "executionTimeMillisEstimate": 0,
-            "works": 46,
-            "advanced": 45,
+            "nReturned": 50,
+            "executionTimeMillisEstimate": 5,
+            "works": 50,
+            "advanced": 50,
             "needTime": 0,
             "needYield": 0,
             "saveState": 0,
             "restoreState": 0,
-            "isEOF": 1,
+            "isEOF": 0,
             "transformBy": {
               "_id": 0,
               "order_id": 1,
@@ -358,29 +369,29 @@
             },
             "inputStage": {
               "stage": "FETCH",
-              "nReturned": 45,
-              "executionTimeMillisEstimate": 0,
-              "works": 46,
-              "advanced": 45,
+              "nReturned": 50,
+              "executionTimeMillisEstimate": 5,
+              "works": 50,
+              "advanced": 50,
               "needTime": 0,
               "needYield": 0,
               "saveState": 0,
               "restoreState": 0,
-              "isEOF": 1,
+              "isEOF": 0,
               "nss": "midterm_pipeline.orders_validated",
-              "docsExamined": 45,
+              "docsExamined": 50,
               "alreadyHasObj": 0,
               "inputStage": {
                 "stage": "IXSCAN",
-                "nReturned": 45,
-                "executionTimeMillisEstimate": 0,
-                "works": 46,
-                "advanced": 45,
+                "nReturned": 50,
+                "executionTimeMillisEstimate": 5,
+                "works": 50,
+                "advanced": 50,
                 "needTime": 0,
                 "needYield": 0,
                 "saveState": 0,
                 "restoreState": 0,
-                "isEOF": 1,
+                "isEOF": 0,
                 "nss": "midterm_pipeline.orders_validated",
                 "keyPattern": {
                   "city": 1,
@@ -410,7 +421,7 @@
                     "[MaxKey, MinKey]"
                   ]
                 },
-                "keysExamined": 45,
+                "keysExamined": 50,
                 "seeks": 1,
                 "dupsTested": 0,
                 "dupsDropped": 0,
@@ -478,26 +489,37 @@
       "nReturned": 1,
       "executionTimeMillis": 1,
       "totalKeysExamined": 0,
-      "totalDocsExamined": 986,
-      "stage": "SORT",
-      "outerStage": "PROJECTION_SIMPLE",
+      "totalDocsExamined": 1380,
+      "stage": "COLLSCAN → SORT",
+      "primaryScan": "COLLSCAN",
+      "stages": [
+        "PROJECTION_SIMPLE",
+        "SORT",
+        "COLLSCAN"
+      ],
       "indexName": null
     },
     "after_index": {
       "executionSuccess": true,
       "nReturned": 1,
-      "executionTimeMillis": 7,
+      "executionTimeMillis": 6,
       "totalKeysExamined": 1,
       "totalDocsExamined": 1,
-      "stage": "LIMIT",
-      "outerStage": "LIMIT",
-      "indexName": null
+      "stage": "IXSCAN → FETCH → LIMIT",
+      "primaryScan": "IXSCAN",
+      "stages": [
+        "LIMIT",
+        "PROJECTION_SIMPLE",
+        "FETCH",
+        "IXSCAN"
+      ],
+      "indexName": "idx_customer_id_order_date"
     },
     "performance_gain": {
-      "time_saved_ms": -6,
-      "docs_examined_reduction": 985,
-      "docs_ratio": 986.0,
-      "stage_transition": "SORT -> LIMIT"
+      "time_saved_ms": -5,
+      "docs_examined_reduction": 1379,
+      "docs_ratio": 1380.0,
+      "stage_transition": "COLLSCAN → SORT -> IXSCAN → FETCH → LIMIT"
     },
     "raw_explain_before": {
       "explainVersion": "1",
@@ -557,15 +579,15 @@
         "nReturned": 1,
         "executionTimeMillis": 1,
         "totalKeysExamined": 0,
-        "totalDocsExamined": 986,
+        "totalDocsExamined": 1380,
         "executionStages": {
           "isCached": false,
           "stage": "PROJECTION_SIMPLE",
           "nReturned": 1,
           "executionTimeMillisEstimate": 0,
-          "works": 989,
+          "works": 1383,
           "advanced": 1,
-          "needTime": 987,
+          "needTime": 1381,
           "needYield": 0,
           "saveState": 0,
           "restoreState": 0,
@@ -583,9 +605,9 @@
             "stage": "SORT",
             "nReturned": 1,
             "executionTimeMillisEstimate": 0,
-            "works": 989,
+            "works": 1383,
             "advanced": 1,
-            "needTime": 987,
+            "needTime": 1381,
             "needYield": 0,
             "saveState": 0,
             "restoreState": 0,
@@ -613,16 +635,16 @@
               },
               "nReturned": 1,
               "executionTimeMillisEstimate": 0,
-              "works": 987,
+              "works": 1381,
               "advanced": 1,
-              "needTime": 985,
+              "needTime": 1379,
               "needYield": 0,
               "saveState": 0,
               "restoreState": 0,
               "isEOF": 1,
               "nss": "midterm_pipeline.orders_validated",
               "direction": "forward",
-              "docsExamined": 986
+              "docsExamined": 1380
             }
           }
         },
@@ -742,14 +764,14 @@
       "executionStats": {
         "executionSuccess": true,
         "nReturned": 1,
-        "executionTimeMillis": 7,
+        "executionTimeMillis": 6,
         "totalKeysExamined": 1,
         "totalDocsExamined": 1,
         "executionStages": {
           "isCached": false,
           "stage": "LIMIT",
           "nReturned": 1,
-          "executionTimeMillisEstimate": 3,
+          "executionTimeMillisEstimate": 6,
           "works": 2,
           "advanced": 1,
           "needTime": 0,
@@ -761,7 +783,7 @@
           "inputStage": {
             "stage": "PROJECTION_SIMPLE",
             "nReturned": 1,
-            "executionTimeMillisEstimate": 3,
+            "executionTimeMillisEstimate": 6,
             "works": 2,
             "advanced": 1,
             "needTime": 0,
@@ -781,7 +803,7 @@
             "inputStage": {
               "stage": "FETCH",
               "nReturned": 1,
-              "executionTimeMillisEstimate": 3,
+              "executionTimeMillisEstimate": 6,
               "works": 2,
               "advanced": 1,
               "needTime": 0,
@@ -795,7 +817,7 @@
               "inputStage": {
                 "stage": "IXSCAN",
                 "nReturned": 1,
-                "executionTimeMillisEstimate": 3,
+                "executionTimeMillisEstimate": 6,
                 "works": 2,
                 "advanced": 1,
                 "needTime": 0,
@@ -893,11 +915,16 @@
     "before_index": {
       "executionSuccess": true,
       "nReturned": 50,
-      "executionTimeMillis": 2,
+      "executionTimeMillis": 3,
       "totalKeysExamined": 0,
-      "totalDocsExamined": 986,
-      "stage": "SORT",
-      "outerStage": "PROJECTION_SIMPLE",
+      "totalDocsExamined": 1380,
+      "stage": "COLLSCAN → SORT",
+      "primaryScan": "COLLSCAN",
+      "stages": [
+        "PROJECTION_SIMPLE",
+        "SORT",
+        "COLLSCAN"
+      ],
       "indexName": null
     },
     "after_index": {
@@ -906,15 +933,21 @@
       "executionTimeMillis": 7,
       "totalKeysExamined": 50,
       "totalDocsExamined": 50,
-      "stage": "LIMIT",
-      "outerStage": "LIMIT",
-      "indexName": null
+      "stage": "IXSCAN → FETCH → LIMIT",
+      "primaryScan": "IXSCAN",
+      "stages": [
+        "LIMIT",
+        "PROJECTION_SIMPLE",
+        "FETCH",
+        "IXSCAN"
+      ],
+      "indexName": "idx_order_date_total_amount"
     },
     "performance_gain": {
-      "time_saved_ms": -5,
-      "docs_examined_reduction": 936,
-      "docs_ratio": 19.72,
-      "stage_transition": "SORT -> LIMIT"
+      "time_saved_ms": -4,
+      "docs_examined_reduction": 1330,
+      "docs_ratio": 27.6,
+      "stage_transition": "COLLSCAN → SORT -> IXSCAN → FETCH → LIMIT"
     },
     "raw_explain_before": {
       "explainVersion": "1",
@@ -999,17 +1032,17 @@
       "executionStats": {
         "executionSuccess": true,
         "nReturned": 50,
-        "executionTimeMillis": 2,
+        "executionTimeMillis": 3,
         "totalKeysExamined": 0,
-        "totalDocsExamined": 986,
+        "totalDocsExamined": 1380,
         "executionStages": {
           "isCached": false,
           "stage": "PROJECTION_SIMPLE",
           "nReturned": 50,
-          "executionTimeMillisEstimate": 0,
-          "works": 1038,
+          "executionTimeMillisEstimate": 3,
+          "works": 1432,
           "advanced": 50,
-          "needTime": 987,
+          "needTime": 1381,
           "needYield": 0,
           "saveState": 0,
           "restoreState": 0,
@@ -1025,10 +1058,10 @@
           "inputStage": {
             "stage": "SORT",
             "nReturned": 50,
-            "executionTimeMillisEstimate": 0,
-            "works": 1038,
+            "executionTimeMillisEstimate": 3,
+            "works": 1432,
             "advanced": 50,
-            "needTime": 987,
+            "needTime": 1381,
             "needYield": 0,
             "saveState": 0,
             "restoreState": 0,
@@ -1040,7 +1073,7 @@
             "memLimit": 104857600,
             "limitAmount": 50,
             "type": "simple",
-            "totalDataSizeSorted": 109094,
+            "totalDataSizeSorted": 108282,
             "usedDisk": false,
             "spills": 0,
             "spilledRecords": 0,
@@ -1068,10 +1101,10 @@
                   }
                 ]
               },
-              "nReturned": 986,
-              "executionTimeMillisEstimate": 0,
-              "works": 987,
-              "advanced": 986,
+              "nReturned": 1380,
+              "executionTimeMillisEstimate": 3,
+              "works": 1381,
+              "advanced": 1380,
               "needTime": 0,
               "needYield": 0,
               "saveState": 0,
@@ -1079,7 +1112,7 @@
               "isEOF": 1,
               "nss": "midterm_pipeline.orders_validated",
               "direction": "forward",
-              "docsExamined": 986
+              "docsExamined": 1380
             }
           }
         },

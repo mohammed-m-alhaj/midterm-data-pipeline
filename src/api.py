@@ -244,7 +244,7 @@ def list_queries() -> Dict[str, Any]:
                 "name": "orders_by_payment_details",
                 "description": "Filter orders by payment status and payment method.",
                 "supported_parameters": ["payment_status", "payment_method", "limit", "explain"],
-                "optimal_index": "idx_validated_payment",
+                "optimal_index": "uq_validated_order_id (Order Key Index)",
             },
             {
                 "name": "recent_orders_by_delivery",

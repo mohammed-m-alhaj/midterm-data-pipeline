@@ -415,11 +415,11 @@ db.orders_validated.create_index([("delivery_type", 1), ("city", 1)], name="idx_
 #### 8.10 إثبات قياس Explain ومقارنة الأداء قبل وبعد الفهارس (1.5 درجة)
 تم استخراج مقاييس التنفيذ الحقيقية لثلاثة استعلامات قبل الفهارس وبعدها:
 
-| الاستعلام | مرحلة التنفيذ (قبل) | مرحلة التنفيذ (بعد) | الوثائق المفحوصة (قبل) | الوثائق المفحوصة (بعد) | نسبة الاختصار | الأثر على الموارد |
-|---|:---:|:---:|:---:|:---:|:---:|---|
-| **`orders_by_customer`** | `COLLSCAN + SORT` | **`IXSCAN + FETCH`** | 540 وثيقة | **وثيقة واحدة (1)** | **99.8%** | وصول فوري عبر B-Tree دون فحص أي وثائق غير مطابقة. |
-| **`orders_by_city_status`** | `COLLSCAN + SORT` | **`IXSCAN + FETCH`** | 540 وثيقة | **20 وثيقة** | **96.3%** | تجنب مرحلة SORT المكلفة ومنع خطر استهلاك 32MB في الذاكرة. |
-| **`high_value_orders_by_date`** | `COLLSCAN + SORT` | **`IXSCAN + FETCH`** | 540 وثيقة | **50 وثيقة** | **90.7%** | قراءة النطاق الزمني مباشرة من شريحة الفهرس. |
+| الاستعلام | مرحلة التنفيذ (قبل) | مرحلة التنفيذ (بعد) | الفهرس المستخدم | الوثائق المفحوصة (قبل) | الوثائق المفحوصة (بعد) | نسبة الاختصار | الأثر على الموارد |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|---|
+| **`orders_by_customer`** | `COLLSCAN → SORT` | **`IXSCAN → FETCH → LIMIT`** | `idx_customer_id_order_date` | 1,380 وثيقة | **وثيقة واحدة (1)** | **99.9%** | وصول فوري عبر B-Tree دون فحص أي وثائق غير مطابقة. |
+| **`orders_by_city_status`** | `COLLSCAN → SORT` | **`IXSCAN → FETCH → LIMIT`** | `idx_city_status_total_amount` | 1,380 وثيقة | **50 وثيقة** | **96.4%** | تجنب مرحلة SORT المكلفة ومنع خطر استهلاك الذاكرة العشوائية RAM. |
+| **`high_value_orders_by_date`** | `COLLSCAN → SORT` | **`IXSCAN → FETCH → LIMIT`** | `idx_order_date_total_amount` | 1,380 وثيقة | **50 وثيقة** | **96.4%** | قراءة النطاق الزمني مباشرة من شريحة الفهرس وتجاوز الفحص الكامل. |
 
 > 📁 **ملفات الأدلة:** [`reports/phase2_evidence/explain_comparison.md`](reports/phase2_evidence/explain_comparison.md) و [`reports/phase2_evidence/explain_before_after.json`](reports/phase2_evidence/explain_before_after.json).
 

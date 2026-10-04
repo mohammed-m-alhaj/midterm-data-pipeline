@@ -120,12 +120,13 @@ def run_all_benchmarks():
 
     # Save explain comparison Markdown
     md_content = ["# 📊 MongoDB Explain (executionStats) Before vs After Indexes\n"]
-    md_content.append("| Query Name | Stage Before | Stage After | Docs Examined (Before) | Docs Examined (After) | Execution Time (Before) | Execution Time (After) |")
-    md_content.append("|---|:---:|:---:|:---:|:---:|:---:|:---:|")
+    md_content.append("| Query Name | Stage Before | Stage After | Docs Examined (Before) | Docs Examined (After) | Execution Time (Before) | Execution Time (After) | Index Used |")
+    md_content.append("|---|:---:|:---:|:---:|:---:|:---:|:---:|---|")
     for r in explain_results:
         b = r["before_index"]
         a = r["after_index"]
-        md_content.append(f"| `{r['query_name']}` | `{b['stage']}` | **`{a['stage']}`** | {b['totalDocsExamined']} | **{a['totalDocsExamined']}** | {b['executionTimeMillis']} ms | **{a['executionTimeMillis']} ms** |")
+        idx = a.get("indexName") or "None"
+        md_content.append(f"| `{r['query_name']}` | `{b['stage']}` | **`{a['stage']}`** | {b['totalDocsExamined']:,} | **{a['totalDocsExamined']:,}** | {b['executionTimeMillis']} ms | **{a['executionTimeMillis']} ms** | `{idx}` |")
     
     with open(EVIDENCE_DIR / "explain_comparison.md", "w", encoding="utf-8") as f:
         f.write("\n".join(md_content) + "\n")
@@ -133,7 +134,7 @@ def run_all_benchmarks():
     # -------------------------------------------------------------------------
     # TEST 2: Aggregation Reports
     # -------------------------------------------------------------------------
-    print("\n\033[1m\033[93m[2/5] Testing 5 Aggregation Reports...\033[0m")
+    print("\n\033[1m\033[93m[2/5] Testing 6 Aggregation Reports...\033[0m")
     agg_results = {}
     for agg_name, agg_fn in AGGREGATION_REGISTRY.items():
         res = agg_fn()

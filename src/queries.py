@@ -243,16 +243,39 @@ def extract_execution_stats(explain_plan: Dict[str, Any]) -> Dict[str, Any]:
     query_planner = explain_plan.get("queryPlanner", {})
     winning_plan = query_planner.get("winningPlan", {})
 
-    # Detect the scanning stage (COLLSCAN, IXSCAN, FETCH, SORT)
-    stage = winning_plan.get("stage", "UNKNOWN")
-    child_stage = winning_plan.get("inputStage", {}).get("stage") if "inputStage" in winning_plan else None
-    primary_stage = child_stage if stage in ("FETCH", "PROJECTION_SIMPLE", "SORT") and child_stage else stage
-
+    stages = []
     index_name = None
-    if "inputStage" in winning_plan and "indexName" in winning_plan["inputStage"]:
-        index_name = winning_plan["inputStage"]["indexName"]
-    elif "indexName" in winning_plan:
-        index_name = winning_plan["indexName"]
+    curr = winning_plan
+    while curr and isinstance(curr, dict):
+        st = curr.get("stage")
+        if st and st not in stages:
+            stages.append(st)
+        if not index_name and "indexName" in curr:
+            index_name = curr["indexName"]
+        child = curr.get("inputStage")
+        if not child and curr.get("inputStages"):
+            child = curr.get("inputStages")[0] if len(curr["inputStages"]) > 0 else None
+        curr = child
+
+    if "IXSCAN" in stages:
+        parts = ["IXSCAN"]
+        if "FETCH" in stages:
+            parts.append("FETCH")
+        if "LIMIT" in stages:
+            parts.append("LIMIT")
+        display_stage = " → ".join(parts)
+        primary_scan = "IXSCAN"
+    elif "COLLSCAN" in stages:
+        parts = ["COLLSCAN"]
+        if "SORT" in stages:
+            parts.append("SORT")
+        if "LIMIT" in stages:
+            parts.append("LIMIT")
+        display_stage = " → ".join(parts)
+        primary_scan = "COLLSCAN"
+    else:
+        primary_scan = stages[-1] if stages else "UNKNOWN"
+        display_stage = " → ".join(reversed(stages)) if stages else primary_scan
 
     return {
         "executionSuccess": execution_stats.get("executionSuccess", True),
@@ -260,8 +283,9 @@ def extract_execution_stats(explain_plan: Dict[str, Any]) -> Dict[str, Any]:
         "executionTimeMillis": execution_stats.get("executionTimeMillis", 0),
         "totalKeysExamined": execution_stats.get("totalKeysExamined", 0),
         "totalDocsExamined": execution_stats.get("totalDocsExamined", 0),
-        "stage": primary_stage,
-        "outerStage": stage,
+        "stage": display_stage,
+        "primaryScan": primary_scan,
+        "stages": stages,
         "indexName": index_name,
     }
 
