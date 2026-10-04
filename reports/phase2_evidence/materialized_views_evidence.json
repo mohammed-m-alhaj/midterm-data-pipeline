@@ -1,0 +1,94 @@
+{
+  "full_refresh": {
+    "daily_sales_summary": {
+      "view_name": "mv_daily_sales_summary",
+      "mode": "full",
+      "status": "SUCCESS",
+      "affected_keys": 170,
+      "total_documents_in_view": 170,
+      "duration_ms": 57.93
+    },
+    "customer_metrics": {
+      "view_name": "mv_customer_metrics",
+      "mode": "full",
+      "status": "SUCCESS",
+      "affected_keys": 182,
+      "total_documents_in_view": 182,
+      "duration_ms": 26.51
+    },
+    "refreshed_at": "2026-10-04T16:47:31.564081+00:00",
+    "incremental": false
+  },
+  "incremental_refresh_test": {
+    "view_name": "mv_daily_sales_summary",
+    "mode": "incremental",
+    "status": "SUCCESS",
+    "affected_keys": 1,
+    "total_documents_in_view": 170,
+    "duration_ms": 32.13
+  },
+  "views_status": [
+    {
+      "view_name": "mv_daily_sales_summary",
+      "document_count": 170,
+      "last_refreshed_at": "2026-10-04T16:47:31.599800+00:00",
+      "last_mode": "incremental",
+      "duration_ms": 32.13,
+      "status": "SUCCESS",
+      "sample_records": [
+        {
+          "date": "2026-06-18",
+          "order_count": 5,
+          "completed_orders": 0,
+          "pending_orders": 3,
+          "total_sales": 120000.0,
+          "avg_order_value": 24000.0,
+          "total_delivery_fees": 10000.0,
+          "updated_at": "2026-10-04T16:47:31.501693+00:00"
+        },
+        {
+          "date": "2026-06-27",
+          "order_count": 1,
+          "completed_orders": 0,
+          "pending_orders": 1,
+          "total_sales": 50000.0,
+          "avg_order_value": 50000.0,
+          "total_delivery_fees": 2000.0,
+          "updated_at": "2026-10-04T16:47:31.501693+00:00"
+        }
+      ]
+    },
+    {
+      "view_name": "mv_customer_metrics",
+      "document_count": 182,
+      "last_refreshed_at": "2026-10-04T16:47:31.544836+00:00",
+      "last_mode": "full",
+      "duration_ms": 26.51,
+      "status": "SUCCESS",
+      "sample_records": [
+        {
+          "customer_id": "CUST-0007",
+          "customer_name": "عميل رقم 7",
+          "customer_phone": "+967771000007",
+          "city": "صنعاء",
+          "order_count": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "total_spend": 12000.0,
+          "avg_order_value": 12000.0,
+          "updated_at": "2026-10-04T16:47:31.534303+00:00"
+        },
+        {
+          "customer_id": "CUST-0034",
+          "customer_name": "عميل رقم 34",
+          "customer_phone": "+967771000034",
+          "city": "صنعاء",
+          "order_count": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "total_spend": 12000.0,
+          "avg_order_value": 12000.0,
+          "updated_at": "2026-10-04T16:47:31.534303+00:00"
+        }
+      ]
+    }
+  ]
+}

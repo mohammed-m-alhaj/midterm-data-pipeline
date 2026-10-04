@@ -1,0 +1,228 @@
+{
+  "GET /health": {
+    "status_code": 200,
+    "data": {
+      "status": "HEALTHY",
+      "database": "midterm_pipeline",
+      "mongo_uri": "mongodb://127.0.0.1:27017",
+      "collections_status": {
+        "orders_raw": 1140,
+        "orders_validated": 540,
+        "orders_quarantine": 3,
+        "mv_daily_sales_summary": 170,
+        "mv_customer_metrics": 182
+      },
+      "scheduler_active": false
+    }
+  },
+  "POST /indexes": {
+    "status_code": 200,
+    "data": {
+      "status": "SUCCESS",
+      "created_indexes": [
+        "idx_city_status_total_amount",
+        "idx_customer_id_order_date",
+        "idx_order_date_total_amount",
+        "idx_delivery_type_city"
+      ],
+      "target_definitions": [
+        {
+          "name": "idx_city_status_total_amount",
+          "keys": [
+            [
+              "city",
+              1
+            ],
+            [
+              "status",
+              1
+            ],
+            [
+              "total_amount",
+              -1
+            ]
+          ],
+          "description": "Compound index supporting equality filtering on city and status with index-ordered scan on total_amount."
+        },
+        {
+          "name": "idx_customer_id_order_date",
+          "keys": [
+            [
+              "customer_id",
+              1
+            ],
+            [
+              "order_date",
+              -1
+            ]
+          ],
+          "description": "Compound index for fast customer order history lookups sorted chronologically."
+        },
+        {
+          "name": "idx_order_date_total_amount",
+          "keys": [
+            [
+              "order_date",
+              1
+            ],
+            [
+              "total_amount",
+              1
+            ]
+          ],
+          "description": "Compound index for date range filtering combined with amount boundary queries."
+        },
+        {
+          "name": "idx_delivery_type_city",
+          "keys": [
+            [
+              "delivery_type",
+              1
+            ],
+            [
+              "city",
+              1
+            ]
+          ],
+          "description": "Index supporting delivery logistics routing and regional filtering."
+        }
+      ],
+      "all_current_indexes": {
+        "_id_": {
+          "v": 2,
+          "key": [
+            [
+              "_id",
+              1
+            ]
+          ]
+        },
+        "uq_validated_order_id": {
+          "v": 2,
+          "key": [
+            [
+              "order_id",
+              1
+            ]
+          ],
+          "unique": true
+        },
+        "idx_validated_quality_status": {
+          "v": 2,
+          "key": [
+            [
+              "quality_status",
+              1
+            ]
+          ]
+        },
+        "idx_validated_run_id": {
+          "v": 2,
+          "key": [
+            [
+              "run_id",
+              1
+            ]
+          ]
+        },
+        "idx_validated_record_hash": {
+          "v": 2,
+          "key": [
+            [
+              "record_hash",
+              1
+            ]
+          ]
+        },
+        "idx_city_status_total_amount": {
+          "v": 2,
+          "key": [
+            [
+              "city",
+              1
+            ],
+            [
+              "status",
+              1
+            ],
+            [
+              "total_amount",
+              -1
+            ]
+          ]
+        },
+        "idx_customer_id_order_date": {
+          "v": 2,
+          "key": [
+            [
+              "customer_id",
+              1
+            ],
+            [
+              "order_date",
+              -1
+            ]
+          ]
+        },
+        "idx_order_date_total_amount": {
+          "v": 2,
+          "key": [
+            [
+              "order_date",
+              1
+            ],
+            [
+              "total_amount",
+              1
+            ]
+          ]
+        },
+        "idx_delivery_type_city": {
+          "v": 2,
+          "key": [
+            [
+              "delivery_type",
+              1
+            ],
+            [
+              "city",
+              1
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "GET /queries": {
+    "status_code": 200,
+    "queries_count": 5
+  },
+  "GET /queries/orders_by_city_status": {
+    "status_code": 200,
+    "count": 20
+  },
+  "GET /queries/orders_by_city_status?explain=true": {
+    "status_code": 200,
+    "has_execution_stats": true
+  },
+  "GET /aggregations": {
+    "status_code": 200,
+    "aggregations_count": 5
+  },
+  "GET /aggregations/sales_by_city": {
+    "status_code": 200,
+    "records_returned": 5
+  },
+  "POST /refresh-mv": {
+    "status_code": 200,
+    "status": "SUCCESS"
+  },
+  "GET /jobs": {
+    "status_code": 200,
+    "jobs_count": 2
+  },
+  "POST /jobs/generate_analytics_snapshot/run": {
+    "status_code": 200,
+    "job_status": "SUCCESS"
+  }
+}

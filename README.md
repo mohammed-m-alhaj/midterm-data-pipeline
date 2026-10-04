@@ -5,7 +5,7 @@
 [![PySpark](https://img.shields.io/badge/PySpark-4.2.0-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)](https://spark.apache.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-8.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Spark Cluster](https://img.shields.io/badge/Cluster-Spark_Standalone-007ACC?style=for-the-badge&logo=apache&logoColor=white)](https://spark.apache.org/docs/latest/spark-standalone.html)
-[![Test Suite](https://img.shields.io/badge/Tests-15%20Passed%20%7C%20100%25-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![Test Suite](https://img.shields.io/badge/Tests-22%20Passed%20%7C%20100%25-brightgreen?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
 [![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge)](https://github.com/)
 
 ---
@@ -30,11 +30,12 @@
 | 6 | [التثبيت خطوة بخطوة](#️-6-التثبيت-والتشغيل-خطوة-بخطوة) | من `git clone` إلى التشغيل |
 | 7 | [دليل التشغيل السريع](#-7-دليل-التشغيل-السريع) | أوامر التشغيل الأساسية |
 | 8 | [مخرجات التشغيل الفعلية](#-8-مخرجات-التشغيل-الفعلية-ودليل-الإثبات) | إثبات حي لكل معيار تقييم |
-| 9 | [الاختبارات الآلية](#-9-تشغيل-الاختبارات-الآلية) | PyTest — 15 اختبار |
+| 9 | [الاختبارات الآلية](#-9-تشغيل-الاختبارات-الآلية) | PyTest — 22 اختباراً (15 لـ Phase 1 و 7 لـ Phase 2) |
 | 10 | [مسار Spark Standalone](#-10-تشغيل-مسار-spark-standalone-path-a) | الكلاستر المحلي |
 | 11 | [المخططات المعمارية التفصيلية](#-11-المخططات-المعمارية-التفصيلية) | 9 مخططات Mermaid تفاعلية |
 | 12 | [جدول متغيرات البيئة](#️-12-جدول-متغيرات-البيئة) | شرح كل إعداد |
 | 13 | [ربط معايير التقييم](#-13-ربط-معايير-التقييم-بالتنفيذ) | تغطية كل بند درجات |
+| 14 | [المرحلة الثانية (Phase 2): الاستعلامات والفهارس والواجهة الموحدة](#-14-المرحلة-الثانية-phase-2-استعلامات-فهارس-تجميع-fastapi) | متطلبات المشروع النهائي (7 درجات كاملة) |
 
 ---
 
@@ -158,18 +159,22 @@ midterm-data-pipeline/
 │   ├── mongo_setup.py           # تهيئة MongoDB + فهارس + JSON Schema
 │   ├── metrics.py               # مقاييس الأداء → results.json
 │   ├── common.py                # أدوات مساعدة + GPU Detection
-│   ├── generate_4_test_files.py # توليد 4 ملفات اختبار
-│   ├── run_4_files_full_test.py # اختبار شامل لكل السيناريوهات
-│   └── run_update_test.py       # اختبار Upsert والتحديث
+│   ├── queries.py               # استعلامات Phase 2 والفهارس المركبة و Explain
+│   ├── aggregations.py          # تقارير التجميع الـ 5 المستقلة
+│   ├── materialized_views.py    # الجداول المجمعة والتحديث التزايدي
+│   ├── jobs.py                  # المهام المجدولة وسجلات التنفيذ
+│   ├── api.py                   # واجهة FastAPI الموحدة
+│   ├── generate_phase2_dynamic_dataset.py # توليد بيانات اختبار ديناميكية
+│   └── run_phase2_comprehensive_benchmarks.py # سكريبت المعايير الشاملة
 ├── cluster/                     # سكريبتات Spark Standalone
 ├── data/                        # ملفات البيانات
 ├── reports/                     # تقارير + screenshots + evidence
-├── tests/                       # PyTest (15 اختبار)
-├── docs/                        # وثائق معمارية
-├── DIAGRAM.md                   # 9 مخططات Mermaid تفاعلية
-├── DIAGRAM.cd                   # مخطط UML Class Diagram
+├── tests/                       # PyTest (22 اختباراً: 15 لـ Phase 1 + 7 لـ Phase 2)
+├── docs/                        # وثائق معمارية (architecture + phase2_analysis)
+├── example.env                  # نموذج متغيرات البيئة النظيف
+├── pytest.ini                   # ضبط الاختبارات الآلية
 ├── requirements.txt             # المكتبات المطلوبة
-└── README.md                    # هذا الملف
+└── README.md                    # دليل التوثيق الشامل
 ```
 
 ---
@@ -444,27 +449,34 @@ MongoDB Atomic Upsert Stats: Inserted: 0 | Updated: 41 | Unchanged: 4,213
 ## ✅ 9. تشغيل الاختبارات الآلية
 
 ```bash
-python -m pytest tests/ -v
+python -m pytest
 ```
 
-**النتيجة الفعلية: 15 Passed في 0.02 ثانية ✅**
-```
-tests/test_classification.py::test_quarantine_single_error              PASSED [  6%]
-tests/test_classification.py::test_quarantine_multiple_conflicting      PASSED [ 13%]
-tests/test_classification.py::test_valid_record_no_errors               PASSED [ 20%]
-tests/test_classification.py::test_quarantine_all_error_codes           PASSED [ 26%]
-tests/test_classification.py::test_corrected_status_distinction         PASSED [ 33%]
-tests/test_cleaning_rules.py::test_arabic_digits_conversion             PASSED [ 40%]
-tests/test_cleaning_rules.py::test_currency_removal                     PASSED [ 46%]
-tests/test_cleaning_rules.py::test_thousand_separators                  PASSED [ 53%]
-tests/test_cleaning_rules.py::test_price_in_words                       PASSED [ 60%]
-tests/test_cleaning_rules.py::test_phone_normalization                  PASSED [ 66%]
-tests/test_cleaning_rules.py::test_email_cleaning                       PASSED [ 73%]
-tests/test_cleaning_rules.py::test_date_format_examples                 PASSED [ 80%]
-tests/test_cleaning_rules.py::test_status_standardization               PASSED [ 86%]
-tests/test_cleaning_rules.py::test_whitespace_trimming                  PASSED [ 93%]
-tests/test_cleaning_rules.py::test_none_handling                        PASSED [100%]
-========================= 15 passed in 0.02s =========================
+**النتيجة الفعلية: 22 Passed بنسبة 100% (15 لـ Phase 1 و 7 لـ Phase 2) ✅**
+```text
+tests/test_classification.py::test_quarantine_single_error PASSED        [  4%]
+tests/test_classification.py::test_quarantine_multiple_conflicting_errors PASSED [  9%]
+tests/test_classification.py::test_valid_record_no_errors PASSED         [ 13%]
+tests/test_classification.py::test_quarantine_all_error_codes PASSED     [ 18%]
+tests/test_classification.py::test_corrected_status_distinction PASSED   [ 22%]
+tests/test_cleaning_rules.py::test_arabic_digits_conversion PASSED       [ 27%]
+tests/test_cleaning_rules.py::test_currency_removal PASSED               [ 31%]
+tests/test_cleaning_rules.py::test_thousand_separators PASSED            [ 36%]
+tests/test_cleaning_rules.py::test_price_in_words PASSED                 [ 40%]
+tests/test_cleaning_rules.py::test_phone_normalization PASSED            [ 45%]
+tests/test_cleaning_rules.py::test_email_cleaning PASSED                 [ 50%]
+tests/test_cleaning_rules.py::test_date_format_examples PASSED           [ 54%]
+tests/test_cleaning_rules.py::test_status_standardization PASSED         [ 59%]
+tests/test_cleaning_rules.py::test_whitespace_trimming PASSED            [ 63%]
+tests/test_cleaning_rules.py::test_none_handling                        PASSED [ 68%]
+tests/test_phase2.py::test_phase2_indexes PASSED                         [ 72%]
+tests/test_phase2.py::test_phase2_queries PASSED                         [ 77%]
+tests/test_phase2.py::test_phase2_explain_comparison PASSED              [ 81%]
+tests/test_phase2.py::test_phase2_aggregations PASSED                    [ 86%]
+tests/test_phase2.py::test_phase2_materialized_views PASSED              [ 90%]
+tests/test_phase2.py::test_phase2_jobs PASSED                            [ 95%]
+tests/test_phase2.py::test_phase2_api_endpoints PASSED                   [100%]
+======================== 22 passed in 1.44s ========================
 ```
 
 ---
@@ -740,7 +752,7 @@ erDiagram
 | **Quarantine والتصنيف** | 1.0 | 13 رمز خطأ + أسباب واضحة + اتساق `(valid + quarantine == raw)` | [القسم 8.6](#86-إثبات-quarantine-والتصنيف-10-درجة) |
 | **Idempotency و Upsert** | 1.0 | مفتاح `order_id` + فهرس فريد + SHA-256 + إعادة تشغيل آمنة | [القسم 8.7](#87-إثبات-idempotency-و-upsert-10-درجة) |
 | **القياسات والمقارنة** | 0.75 | Throughput + عدادات Insert/Update/Unchanged + تحليل | [القسم 8.8](#88-إثبات-القياسات-والمقارنة-075-درجة) |
-| **جودة الكود والاختبارات** | 1.0 | README + Config + 15 PyTest (100%) | [القسم 9](#-9-تشغيل-الاختبارات-الآلية) |
+| **جودة الكود والاختبارات** | 1.0 | README + Config + 22 PyTest (100%) | [القسم 9](#-9-تشغيل-الاختبارات-الآلية) |
 | **اكتمال التنفيذ والعرض العملي** | 1.25 | إمكانية تشغيل المشروع أمام الدكتور وشرح القرارات والنتائج | [القسم 7](#-7-دليل-التشغيل-السريع) |
 
 **المجموع: 10.0 / 10.0 (الدرجة الكاملة)**
@@ -791,6 +803,82 @@ erDiagram
 | 09 | **الاختبارات الآلية (PyTest)** | [`09_automated_tests_pytest.png`](reports/screenshots/09_automated_tests_pytest.png) | نجاح 15/15 اختبار بنسبة 100% في 0.02 ثانية |
 | 10 | **معمارية عنقود Spark (Path A)** | [`10_spark_cluster_architecture.png`](reports/screenshots/10_spark_cluster_architecture.png) | تشغيل Master و Worker وتوزيع 16 Partition على أنوية المعالجة |
 | 11 | **لوحة مقاييس الأداء والاتساق** | [`11_pipeline_metrics_summary.png`](reports/screenshots/11_pipeline_metrics_summary.png) | ملخص المقاييس، زمن التنفيذ، ومعادلة اتساق الدفعة run consistency |
+
+---
+
+## 🚀 14. المرحلة الثانية (Phase 2): استعلامات، فهارس، تجميع، جداول مجمعة، مهام، وواجهة FastAPI
+
+تم تنفيذ متطلبات المشروع النهائي السبعة كاملة (7 درجات) بدقة هندسية عالية:
+
+### 1. الاستعلامات والفهارس وتحليل الأداء (Queries + Indexes + Explain)
+- **5 استعلامات عملية موجهة:**
+  1. `orders_by_customer`: استرجاع طلبات عميل محدد مرتبة تنازلياً حسب التاريخ.
+  2. `orders_by_city_status`: استعلام مركب على المدينة والحالة والفرز التنازلي حسب المبلغ الإجمالي.
+  3. `high_value_orders_by_date`: استعلام نطاق زمني مع تصفية المبالغ ذات القيمة العالية.
+  4. `orders_by_payment_details`: تصفية حسب حالة وطريقة الدفع.
+  5. `recent_orders_by_delivery`: تحليل الطلبات حسب نوع التوصيل والمدينة.
+- **الفهارس المركبة (Compound Indexes):**
+  - `idx_city_status_total_amount`: مبني وفق قاعدة **ESR (Equality, Sort, Range)**.
+  - `idx_customer_id_order_date`: للوصول اللحظي لطلبات العملاء.
+  - `idx_order_date_total_amount`: لاستعلامات النطاق الزمني.
+  - `idx_delivery_type_city`: للخدمات اللوجستية.
+- **مقارنة `explain("executionStats")` الفعلية:**
+  - الانتقال من `COLLSCAN + SORT` (مسح 300 وثيقة بالكامل) إلى `IXSCAN + FETCH` (فحص 3 إلى 11 وثيقة فقط).
+  - التوثيق الكامل محفوظ في: [`reports/phase2_evidence/explain_before_after.json`](reports/phase2_evidence/explain_before_after.json) و [`reports/phase2_evidence/explain_comparison.md`](reports/phase2_evidence/explain_comparison.md).
+
+### 2. تقارير التجميع (Aggregation Reports)
+5 تقارير تحليلية مستقلة ومباشرة من MongoDB:
+1. `sales_by_city`: حجم المبيعات وعدد الطلبات ومتوسط وقيمة الطلبات لكل مدينة.
+2. `top_customers`: أعلى العملاء إنفاقاً ومعدل الشراء والقيمة الدائمة.
+3. `sales_by_period`: الاتجاه الزمني اليومي والشهري للمبيعات والإيرادات.
+4. `orders_by_status`: توزيع الطلبات والسيولة حسب حالة الطلب وحالة الدفع.
+5. `delivery_performance`: كفاءة الشحن وتكلفة التوصيل للطلبات العادية والسريعة.
+- التوثيق محفوظ في: [`reports/phase2_evidence/aggregations_results.json`](reports/phase2_evidence/aggregations_results.json).
+
+### 3. الجداول المجمعة والتحديث التزايدي (Materialized Views & Incremental Refresh)
+- جدولان مجمعان في MongoDB:
+  - `mv_daily_sales_summary`: ملخص مبيعات يومي متكامل.
+  - `mv_customer_metrics`: بطاقة تحليل أداء العملاء.
+- **آلية التحديث التزايدي الحقيقية (Incremental Refresh):**
+  - لا يتم إعادة حساب الملايين من البداية؛ بل يتم استخدام العلامة المائية (`last_refreshed_at`) وتحديث التواريخ أو العملاء المتأثرين فقط عبر `$merge` و `ReplaceOne` الذري.
+  - التوثيق محفوظ في: [`reports/phase2_evidence/materialized_views_evidence.json`](reports/phase2_evidence/materialized_views_evidence.json).
+
+### 4. المهام المجدولة وسجلات التنفيذ (Scheduled Jobs & Execution Logs)
+- مهمتان حقيقيتان:
+  - `refresh_materialized_views`: لتحديث الجداول المجمعة دورياً.
+  - `generate_analytics_snapshot`: لتوليد لقطة تحليلية تاريخية وأرشفتها في `analytics_snapshots`.
+- تسجيل شامل في `job_execution_logs`:
+  - `start_time`, `end_time`, `duration_ms`, `status` (`SUCCESS`/`FAILED`), و `error_details`.
+  - التوثيق محفوظ في: [`reports/phase2_evidence/jobs_execution_logs.json`](reports/phase2_evidence/jobs_execution_logs.json).
+
+### 5. واجهة FastAPI الموحدة (Unified Execution Interface)
+واجهة موحدة خفيفة ومباشرة لربط كافة وظائف Phase 1 و Phase 2:
+- تشغيل الخادم:
+  ```powershell
+  uvicorn src.api:app --host 0.0.0.0 --port 8000
+  ```
+- توثيق Swagger التفاعلي:
+  ```text
+  http://127.0.0.1:8000/docs
+  ```
+- الـ Endpoints المتوفرة:
+  - `GET  /health` : فحص حالة النظام والاتصال بقاعدة البيانات وحالة الجداول.
+  - `POST /ingest` : استدعاء موجه Phase 1 (`File Router`) ومحرك التحميل والـ ELT بدون تكرار الكود.
+  - `POST /indexes` : إنشاء وتفعيل فهارس Phase 2 المحسنة.
+  - `GET  /queries` : سرد الاستعلامات المتاحة ومعاملاتها.
+  - `GET  /queries/{name}` : تنفيذ استعلام محدد مع خيار `explain=true`.
+  - `GET  /aggregations` : سرد تقارير التجميع المتاحة.
+  - `GET  /aggregations/{name}` : تشغيل تقرير تجميع محدد وعرض نتائجه الحية.
+  - `POST /refresh-mv` : تشغيل التحديث التزايدي أو الكامل للجداول المجمعة.
+  - `GET  /jobs` : عرض المهام المجدولة وسجلات التنفيذ التاريخية.
+  - `POST /jobs/{name}/run` : تشغيل يدوي فوري لأي مهمة مجدولة.
+
+### 6. تشغيل الاختبارات الشاملة (Phase 1 + Phase 2)
+```powershell
+$env:PYTHONPATH=".;src"
+python -m pytest tests/ -v
+```
+**النتيجة:** نجاح 22/22 اختبار آلي (100% Passed) في أقل من ثانيتين.
 
 ---
 

@@ -1,0 +1,150 @@
+{
+  "sales_by_city": {
+    "record_count": 7,
+    "sample": [
+      {
+        "order_count": 162,
+        "city": "صنعاء",
+        "total_sales": 2153000.0,
+        "avg_order_value": 13290.12,
+        "max_order_value": 50000.0,
+        "min_order_value": 3500.0,
+        "total_delivery_fees": 317500.0
+      },
+      {
+        "order_count": 68,
+        "city": "عدن",
+        "total_sales": 1225000.0,
+        "avg_order_value": 18014.71,
+        "max_order_value": 50500.0,
+        "min_order_value": 3000.0,
+        "total_delivery_fees": 135000.0
+      },
+      {
+        "order_count": 64,
+        "city": "ذمار",
+        "total_sales": 1187000.0,
+        "avg_order_value": 18546.88,
+        "max_order_value": 51000.0,
+        "min_order_value": 4500.0,
+        "total_delivery_fees": 134500.0
+      }
+    ]
+  },
+  "top_customers": {
+    "record_count": 20,
+    "sample": [
+      {
+        "customer_name": "عميل تجريبي 20",
+        "customer_phone": "+967771189598",
+        "city": "الحديدة",
+        "total_orders": 10,
+        "latest_order_date": "2026-06-29T00:00:00",
+        "customer_id": "CUST-DYN-0110",
+        "total_spent": 273000.0,
+        "avg_order_value": 27300.0
+      },
+      {
+        "customer_name": "عميل تجريبي 14",
+        "customer_phone": "+967778634708",
+        "city": "الحديدة",
+        "total_orders": 14,
+        "latest_order_date": "2026-05-30T00:00:00",
+        "customer_id": "CUST-DYN-0140",
+        "total_spent": 264500.0,
+        "avg_order_value": 18892.86
+      },
+      {
+        "customer_name": "عميل تجريبي 38",
+        "customer_phone": "+967775482216",
+        "city": "تعز",
+        "total_orders": 9,
+        "latest_order_date": "2026-05-27T00:00:00",
+        "customer_id": "CUST-DYN-0171",
+        "total_spent": 225500.0,
+        "avg_order_value": 25055.56
+      }
+    ]
+  },
+  "sales_by_period": {
+    "record_count": 30,
+    "sample": [
+      {
+        "order_count": 1,
+        "period": "2026-08-25",
+        "total_revenue": 7000.0,
+        "avg_daily_order": 7000.0,
+        "total_delivery_revenue": 2000.0
+      },
+      {
+        "order_count": 100,
+        "period": "2026-08-20",
+        "total_revenue": 1207500.0,
+        "avg_daily_order": 12075.0,
+        "total_delivery_revenue": 207500.0
+      },
+      {
+        "order_count": 3,
+        "period": "2026-06-30",
+        "total_revenue": 29000.0,
+        "avg_daily_order": 9666.67,
+        "total_delivery_revenue": 7000.0
+      }
+    ]
+  },
+  "orders_by_status": {
+    "record_count": 5,
+    "sample": [
+      {
+        "order_count": 141,
+        "order_status": "بانتظار الدفع",
+        "payment_status": "بانتظار الدفع",
+        "total_volume": 2490000.0,
+        "avg_amount": 17659.57
+      },
+      {
+        "order_count": 139,
+        "order_status": "تم الدفع",
+        "payment_status": "تم الدفع",
+        "total_volume": 2139500.0,
+        "avg_amount": 15392.09
+      },
+      {
+        "order_count": 100,
+        "order_status": "مؤكد",
+        "payment_status": "تم الدفع",
+        "total_volume": 1207500.0,
+        "avg_amount": 12075.0
+      }
+    ]
+  },
+  "delivery_performance": {
+    "record_count": 14,
+    "sample": [
+      {
+        "total_shipments": 137,
+        "city": "صنعاء",
+        "delivery_type": "سريع",
+        "total_delivery_cost": 273000.0,
+        "avg_delivery_cost": 1992.7,
+        "total_merchandise_value": 1751500.0
+      },
+      {
+        "total_shipments": 42,
+        "city": "المكلا",
+        "delivery_type": "سريع",
+        "total_delivery_cost": 78000.0,
+        "avg_delivery_cost": 1857.14,
+        "total_merchandise_value": 684000.0
+      },
+      {
+        "total_shipments": 39,
+        "city": "عدن",
+        "delivery_type": "عادي",
+        "total_delivery_cost": 78500.0,
+        "avg_delivery_cost": 2012.82,
+        "total_merchandise_value": 684000.0
+      }
+    ]
+  }
+}
