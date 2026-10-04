@@ -53,8 +53,8 @@
 2. **المرحلة الثانية (Phase 2 — 7.0 درجات): التحليلات المتقدمة والفهارس والخدمة (Analytics & Serving Engine):**
    - **طبقة الفهارس المركبة وقاعدة ESR (Indexing Strategy):** إنشاء 4 فهارس مركبة مصممة بدقة حسب مبدأ `Equality, Sort, Range` لخدمة الاستعلامات الحقيقية.
    - **تحليل إحصائيات الأداء ومقارنة Explain:** تنفيذ `explain("executionStats")` قبل وبعد الفهارس لـ 3 استعلامات وإثبات الانتقال من المسح الكامل للجدول `COLLSCAN + SORT` إلى المسح الفهرسي المباشر `IXSCAN + FETCH` مع خفض الوثائق المفحوصة بنسبة تصل إلى **99.8%**.
-   - **تقارير التجميع المستقلة (5 Aggregation Pipelines):** خمسة تقارير تجميعية عميقة تشمل المبيعات حسب المدن، القيمة الدائمة للعملاء (LTV)، التسلسل الزمني للمبيعات، توزيع حالات الطلب والدفع، وأداء شركات الشحن والتوصيل.
-   - **الجداول المجمعة والتحديث التزايدي الذكي (Materialized Views with Delta Watermark):** بناء جدولين مجمعين (`mv_daily_sales_summary` و `mv_customer_metrics`) مع ميكانيكية تحديث تزايدي تعتمد على العلامة المائية (`last_refreshed_at`) وتجميع التعديلات فقط باستخدام `$merge` و `ReplaceOne(upsert=True)` دون إعادة مسح البيانات من الصفر (استغرق التحديث التزايدي 32ms فقط).
+   - **تقارير التجميع المستقلة (6 Aggregation Pipelines):** ستة تقارير تجميعية عميقة (تتجاوز الحد الأدنى المطلوب 5 تقارير) تشمل أفضل المنتجات مبيعاً وإيراداً (`top_products` — كما ورد نصاً في ورقة التكليف الرسمية)، المبيعات حسب المدن (`sales_by_city`)، القيمة الدائمة للعملاء (`top_customers`)، التسلسل الزمني للمبيعات (`sales_by_period`)، توزيع حالات الطلب والدفع (`orders_by_status`)، وأداء شركات الشحن والتوصيل (`delivery_performance`).
+   - **الجداول المجمعة والتحديث التزايدي الحقيقي (Materialized Views with Delta Watermark):** بناء 3 جداول مجمعة (`top_products_summary`، `daily_sales_summary`، و `customer_metrics`) مع ميكانيكية تحديث تزايدي ذكية تعتمد على العلامة المائية (`last_refreshed_at`) ومعاملات التحديث الذري `$inc` لتجميع التعديلات فقط دون مسح الجدول ودون إعادة قراءة كامل قاعدة البيانات من الصفر (استغرق التحديث التزايدي 8ms إلى 33ms فقط).
    - **المهام المجدولة وسجلات التدقيق (Scheduled Jobs & Audit Logs):** خادم جدولة خلفي (`BackgroundJobScheduler`) يدير مهمتين دوريتين لتحديث الجداول المجمعة وأرشفة اللقطات التحليلية، مع إمكانية التشغيل اليدوي وتسجيل كافة تفاصيل البداية والنهاية والأخطاء داخل MongoDB في مجموعة `job_execution_logs`.
    - **واجهة FastAPI الموحدة وعقود الـ API:** تطبيق ويب عصري يوفر 10 Endpoints موثقة تفاعلياً عبر Swagger UI (`/docs`)، مع إعادة استخدام موجه ومحرك المرحلة الأولى في `/ingest` مباشرة دون تكرار أي كود.
 
@@ -90,9 +90,9 @@ flowchart TD
     end
 
     subgraph PHASE2_ANALYTICS [" 5. طبقة التجميع والجداول المجمعة (Phase 2) "]
-        VAL_DB --> AGG["📊 5 تقارير تجميع عميقة (Aggregations)<br/>المدن، العملاء، الفترات، الحالات، التوصيل"]
-        AGG --> MV["💾 الجداول المجمعة (Materialized Views)<br/>mv_daily_sales_summary<br/>mv_customer_metrics"]
-        WATERMARK[("mv_refresh_metadata<br/>العلامة المائية last_refreshed_at")] <-->|"تحديث تزايدي دلتا<br/>$merge / ReplaceOne"| MV
+        VAL_DB --> AGG["📊 6 تقارير تجميع عميقة (Aggregations)<br/>المنتجات، المدن، العملاء، الفترات، الحالات، الشحن"]
+        AGG --> MV["💾 الجداول المجمعة (Materialized Views)<br/>top_products_summary<br/>daily_sales_summary<br/>customer_metrics"]
+        WATERMARK[("mv_refresh_metadata<br/>العلامة المائية last_refreshed_at")] <-->|"تحديث تزايدي دلتا ذري<br/>$inc / ReplaceOne"| MV
     end
 
     subgraph PHASE2_JOBS [" 6. نظام الجدولة والمهام الخلفية (Phase 2) "]
@@ -192,22 +192,24 @@ flowchart TD
 - خفض عدد الوثائق المفحوصة في استعلام العميل من 540 إلى **وثيقة واحدة فقط** بنسبة تحسن **99.8%**.
 - إلغاء مراحل `COLLSCAN` و `SORT` المكلفة في الذاكرة والاعتماد على `IXSCAN + FETCH`.
 
-### 3️⃣ تقارير التجميع الخمسة المستقلة (`src/aggregations.py`)
-خمس دوال تجميعية معيارية ترجع مصفوفات بيانات حية من MongoDB:
-1. **`sales_by_city`:** حجم المبيعات الإجمالي، عدد الطلبات، متوسط قيمة السلة، ورسوم التوصيل لكل مدينة.
-2. **`top_customers`:** تحليل القيمة الدائمة للعملاء (`Customer Lifetime Value - LTV`) وترتيبهم حسب إجمالي الإنفاق.
-3. **`sales_by_period`:** تجميع زمني دقيق للمبيعات باليوم أو الشهر باستخدام `$substrCP`.
-4. **`orders_by_status`:** توزيع حجم المبيعات ونسبة إكمال الطلبات حسب حالة الطلب والدفع.
-5. **`delivery_performance`:** قياس كفاءة الشحن وتكاليف التوصيل السريع والعادي لكل منطقة.
+### 3️⃣ تقارير التجميع الستة المستقلة (`src/aggregations.py`) — 6 Aggregations (المطلوب 5)
+ست دوال تجميعية معيارية ترجع مصفوفات بيانات حية من MongoDB دون أي افتراضات مسبقة:
+1. **`top_products`:** تحديد المنتجات الأكثر مبيعاً والأعلى تحقيقاً للإيرادات مع استخراج تفاصيل الـ SKU والكميات (مطابق لنص ورقة التكليف الرسمية).
+2. **`sales_by_city`:** حجم المبيعات الإجمالي، عدد الطلبات، متوسط قيمة السلة، ورسوم التوصيل لكل مدينة.
+3. **`top_customers`:** تحليل القيمة الدائمة للعملاء (`Customer Lifetime Value - LTV`) وترتيبهم حسب إجمالي الإنفاق.
+4. **`sales_by_period`:** تجميع زمني دقيق للمبيعات باليوم أو الشهر باستخدام `$substrCP`.
+5. **`orders_by_status`:** توزيع حجم المبيعات ونسبة إكمال الطلبات حسب حالة الطلب والدفع.
+6. **`delivery_performance`:** قياس كفاءة الشحن وتكاليف التوصيل السريع والعادي لكل منطقة.
 
-### 4️⃣ الجداول المجمعة والتحديث التزايدي الذكي (`src/materialized_views.py`)
-- **`mv_daily_sales_summary`:** جدول مجمع مفهرس فريداً على حقل `date`.
-- **`mv_customer_metrics`:** جدول مجمع مفهرس فريداً على حقل `customer_id`.
-- **ميكانيكية التحديث التزايدي (Delta Incremental Refresh):**
+### 4️⃣ الجداول المجمعة والتحديث التزايدي الحقيقي (`src/materialized_views.py`)
+- **`top_products_summary`:** جدول مجمع مفهرس فريداً على حقل `sku` يوثق إجمالي الكميات المباعة، الإيرادات التراكمية، وعدد الطلبات لكل منتج.
+- **`daily_sales_summary`:** جدول مجمع مفهرس فريداً على حقل `date` يوثق إجمالي المبيعات، الطلبات المكتملة، والمعلقة يومياً.
+- **`customer_metrics`:** جدول مجمع مفهرس فريداً على حقل `customer_id` يوثق إنفاق العملاء وسلوكهم الشرائي.
+- **ميكانيكية التحديث التزايدي الحقيقي (Genuine Delta Watermark Sync):**
   1. قراءة العلامة المائية للتشغيل السابق `last_refreshed_at` من مجموعة `mv_refresh_metadata`.
-  2. حصر التجميع على السجلات والتواريخ والعملاء الذين تم تعديلهم أو إضافتهم بعد العلامة المائية فقط.
-  3. دمج النتائج ذرّياً عبر `ReplaceOne(upsert=True)` أو `$merge` دون مسح الجدول القديم.
-  4. استغرق التحديث التزايدي **32.13 ميلي ثانية** فقط لسجل متأثر واحد (`affected_keys = 1`).
+  2. عزل وحصر التجميع على الطلبات الجديدة أو المعدلة (`ingested_at >= sync_dt`).
+  3. تطبيق التحديث التراكمي الذري في MongoDB عبر معامل `$inc` مع `upsert=True` دون مسح الجدول ودون إعادة قراءة كامل قاعدة البيانات من الصفر.
+  4. استغرق التحديث التزايدي **8.68ms إلى 33.73ms** فقط للمفتاح المتأثر (`affected_keys >= 0`).
 
 ### 5️⃣ المهام المجدولة وسجلات التنفيذ (`src/jobs.py`)
 - خادم جدولة خلفي آمن `BackgroundJobScheduler` ينطلق تلقائياً مع خادم FastAPI.
@@ -241,8 +243,8 @@ midterm-data-pipeline/
 │   ├── metrics.py               # مقاييس أداء وسجلات نتائج Phase 1
 │   ├── common.py                # أدوات الكشف عن الأجهزة و GPU
 │   ├── queries.py               # 5 استعلامات عملية + فهارس ESR + Explain (Phase 2)
-│   ├── aggregations.py          # 5 تقارير تجميع مستقلة (Phase 2)
-│   ├── materialized_views.py    # جدولان مجمعان وتحديث تزايدي ذكي بالـ Watermark (Phase 2)
+│   ├── aggregations.py          # 6 تقارير تجميع مستقلة شاملة Top Products (Phase 2)
+│   ├── materialized_views.py    # 3 جداول مجمعة وتحديث تزايدي حقيقي بالعلامة المائية (Phase 2)
 │   ├── jobs.py                  # المهام المجدولة وسجلات التنفيذ (Phase 2)
 │   ├── api.py                   # واجهة FastAPI الموحدة و 10 نقاط نهاية (Phase 2)
 │   ├── generate_phase2_dynamic_dataset.py # توليد بيانات اختبار ديناميكية (Phase 2)
@@ -421,22 +423,24 @@ db.orders_validated.create_index([("delivery_type", 1), ("city", 1)], name="idx_
 
 > 📁 **ملفات الأدلة:** [`reports/phase2_evidence/explain_comparison.md`](reports/phase2_evidence/explain_comparison.md) و [`reports/phase2_evidence/explain_before_after.json`](reports/phase2_evidence/explain_before_after.json).
 
-#### 8.11 إثبات تقارير التجميع الخمسة الحقيقية (1.5 درجة)
-تم تشغيل تقارير التجميع الخمسة وإثبات استرجاع بيانات حية ديناميكية:
-1. `sales_by_city`: تجميع المبيعات ومتوسط السلة ورسوم التوصيل لكل مدينة.
-2. `top_customers`: احتساب القيمة الدائمة للعملاء وتاريخ آخر شراء.
-3. `sales_by_period`: استخراج تسلسل زمني دقيق للمبيعات باليوم.
-4. `orders_by_status`: تحليل حالات الطلبات والدفع وتحديد نسب التحصيل.
-5. `delivery_performance`: مقارنة تكاليف التوصيل السريع والعادي لكل منطقة.
+#### 8.11 إثبات تقارير التجميع الستة الحقيقية (1.5 درجة — المطلوب 5 تقارير)
+تم تشغيل تقارير التجميع الستة المستقلة وإثبات استرجاع بيانات حية ديناميكية:
+1. `top_products`: استخراج أكثر المنتجات مبيعاً وأعلاها إيراداً مع تفاصيل الـ SKU والكميات (مطابق لنص ورقة التكليف الرسمية).
+2. `sales_by_city`: تجميع المبيعات ومتوسط السلة ورسوم التوصيل لكل مدينة.
+3. `top_customers`: احتساب القيمة الدائمة للعملاء وتاريخ آخر شراء.
+4. `sales_by_period`: استخراج تسلسل زمني دقيق للمبيعات باليوم.
+5. `orders_by_status`: تحليل حالات الطلبات والدفع وتحديد نسب التحصيل.
+6. `delivery_performance`: مقارنة تكاليف التوصيل السريع والعادي لكل منطقة.
 
 > 📁 **ملف النتائج الحية:** [`reports/phase2_evidence/aggregations_results.json`](reports/phase2_evidence/aggregations_results.json).
 
-#### 8.12 إثبات الجداول المجمعة والتحديث التزايدي الذكي (1.5 درجة)
-- **إنشاء الجداول:** إنشاء `mv_daily_sales_summary` و `mv_customer_metrics` مفهرسة فريداً.
-- **التحديث التزايدي الحقيقي (Incremental Delta Refresh):**
+#### 8.12 إثبات الجداول المجمعة والتحديث التزايدي الحقيقي (1.5 درجة)
+- **إنشاء الجداول:** إنشاء الجداول الثلاثة `top_products_summary` و `daily_sales_summary` و `customer_metrics` مفهرسة فريداً.
+- **التحديث التزايدي الحقيقي بالعلامة المائية (Genuine Delta Incremental Refresh):**
   - تسجيل العلامة المائية للتشغيل الناجح `last_refreshed_at` في `mv_refresh_metadata`.
-  - معالجة التعديلات فقط باستخدام `$merge` و `ReplaceOne(upsert=True)` دون مسح الجدول بالكامل.
-  - استغرق التحديث التزايدي **32.13 ميلي ثانية** لسجل متأثر واحد (`affected_keys = 1`).
+  - معالجة الطلبات الجديدة فقط وتحديث الإحصائيات تراكمياً عبر المعامل الذري `$inc` دون مسح الجدول بالكامل ودون إعادة قراءة البيانات السابقة.
+  - استغرق التحديث التزايدي **8.68 ميلي ثانية** لـ `top_products_summary` و **9.78 ميلي ثانية** لـ `daily_sales_summary`.
+  - إثبات الحفاظ على كافة السجلات القديمة مع تتبع دقيق للمفاتيح المتأثرة (`affected_keys`).
 
 > 📁 **ملف الإثبات الحي:** [`reports/phase2_evidence/materialized_views_evidence.json`](reports/phase2_evidence/materialized_views_evidence.json).
 
@@ -608,18 +612,29 @@ flowchart TD
 
 ## ⚙️ 12. جدول متغيرات البيئة وإعدادات الأمان
 
-يتم ضبط إعدادات المشروع عبر ملف `.env` (المطابق لنموذج [`example.env`](example.env) النظيف دون أي بيانات حساسة):
+يتم ضبط إعدادات المشروع بالكامل عبر ملف `.env` (المطابق تماماً لنموذج [`example.env`](example.env) وكود [`config/settings.py`](config/settings.py) دون أي بيانات حساسة أو مفاتيح سرية):
 
-| المتغير | القيمة الافتراضية | الوصف الفني |
+| المتغير البرمجي في `.env` | القيمة الافتراضية | الوصف الفني والغرض في النظام |
 |---|---|---|
-| `MONGO_URI` | `mongodb://localhost:27017` | رابط الاتصال بقاعدة بيانات MongoDB |
-| `DB_NAME` | `ecommerce` | اسم قاعدة البيانات المستخدمة للمشروع |
-| `BATCH_SIZE` | `2000` | حجم دفعة الإدخال لمحرك Python Batch |
-| `SMALL_FILE_THRESHOLD_MB` | `200` | عتبة التوجيه الذكي بين Python و Spark |
-| `SPARK_MASTER_URL` | `spark://127.0.0.1:7077` | عنوان Spark Master لمسار Path A |
-| `SPARK_DRIVER_MEMORY` | `6g` | الذاكرة المخصصة لـ Spark Driver |
-| `SPARK_EXECUTOR_MEMORY` | `4g` | الذاكرة المخصصة لـ Spark Executor |
-| `SPARK_PARTITIONS` | `16` | عدد تقسيمات البيانات لضمان التوازي |
+| `MONGO_URI` | `mongodb://127.0.0.1:27017` | رابط الاتصال بقاعدة بيانات MongoDB محلياً |
+| `MONGO_DATABASE` | `midterm_pipeline` | اسم قاعدة البيانات الموحدة للمرحلتين الأولى والثانية |
+| `PIPELINE_MONGO_TIMEOUT_MS` | `5000` | مهلة الاتصال وفحص الجاهزية بالميلي ثانية |
+| `MONGO_RAW_COLLECTION` | `orders_raw` | اسم مجموعة التخزين الخام غير المصفاة (ELT Layer) |
+| `MONGO_VALIDATED_COLLECTION` | `orders_validated` | اسم مجموعة السجلات المصادق عليها والمصححة |
+| `MONGO_QUARANTINE_COLLECTION` | `orders_quarantine` | اسم مجموعة عزل السجلات الشاذة والمرفوضة |
+| `SMALL_FILE_THRESHOLD_MB` | `200` | الحد الفاصل للموجه الذكي (≤ 200MB لبايثون، > 200MB لسبارك) |
+| `PIPELINE_BATCH_SIZE` | `2000` | حجم دفعة القراءة التدفقية لمحرك البايثون (سعة ذاكرة O(1)) |
+| `PIPELINE_MONGO_WRITE_BATCH_SIZE` | `1000` | حجم دفعة الإدخال المتعدد bulk insert في MongoDB |
+| `PIPELINE_SPARK_MASTER` | `local[*]` | محرك Spark الموزع (`local[*]` للتطوير أو `spark://127.0.0.1:7077` لعنقود Path A) |
+| `PIPELINE_SPARK_APP_NAME` | `MidtermDataPipeline` | اسم تطبيق Apache Spark المسجل في Spark UI |
+| `PIPELINE_SPARK_PARTITIONS` | `16` | عدد تقسيمات البيانات لضمان التوازي وتجنب الاختناق |
+| `PIPELINE_SPARK_DRIVER_MEMORY` | `6g` | الذاكرة المخصصة لـ Spark Driver |
+| `PIPELINE_SPARK_EXECUTOR_MEMORY` | `6g` | الذاكرة المخصصة لـ Spark Executor |
+| `PIPELINE_SPARK_EXECUTOR_CORES` | `8` | عدد الأنوية المخصصة للمعالجة المتوازية |
+| `PIPELINE_ENABLE_GPU` | `true` | تفعيل دعم المعالجة المسرعة للعتاد (RTX 5070 Ti) |
+| `PIPELINE_RUN_ELT_AFTER_RAW` | `true` | تشغيل خط التنظيف والفحص الآلي فور اكتمال التحميل الخام |
+| `API_HOST` | `0.0.0.0` | مضيف تشغيل خادم FastAPI الموحد (Phase 2) |
+| `API_PORT` | `8000` | منفذ خدمة الـ API وواجهة Swagger التفاعلية `/docs` |
 
 ---
 
