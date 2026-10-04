@@ -16,7 +16,7 @@
 | **5** | **طبقة العزل (Phase 1)** | استعراض سجلات `orders_quarantine` مع 13 رمز خطأ تشخيصي | MongoDB `orders_quarantine` |
 | **6** | **إثبات اللاتكرارية (Phase 1)** | إعادة تشغيل نفس الملف وإثبات: `Inserted: 0`, `Unchanged: 4,213` | `python src/main.py --file data/test_1_small_clean.csv` |
 | **7** | **توجيه الملف الكبير وعنقود Spark (Path A)** | إثبات اختيار `pyspark` وتوزيع البيانات على الـ Partitions | `python src/main.py --file data/orders_1m_sample.csv` أو `http://127.0.0.1:8080` |
-| **8** | **حزمة الاختبارات الآلية (Phase 1 & 2)** | تشغيل PyTest وإثبات نجاح كافة الاختبارات الـ 22 بنسبة 100% | `python -m pytest` |
+| **8** | **حزمة الاختبارات الآلية (Phase 1 & 2)** | تشغيل PyTest وإثبات نجاح كافة الاختبارات الـ 23 بنسبة 100% | `python -m pytest` |
 | **9** | **الفهارس وقاعدة ESR (Phase 2)** | إنشاء واستعراض الفهارس المركبة الأربعة المصممة بقاعدة ESR | `python -c "from src.queries import create_phase2_indexes; print(create_phase2_indexes())"` |
 | **10** | **مقارنة Explain قبل وبعد (Phase 2)** | إثبات التحول من `COLLSCAN` إلى `IXSCAN` وخفض الوثائق المفحوصة بنسبة 99.8% | `python -c "from src.queries import run_all_queries; run_all_queries()"` |
 | **11** | **تقارير التجميع الـ 6 (Phase 2)** | تشغيل تقارير التجميع واستعراض بيانات المدن والعملاء والشحن والمنتجات حية | `python -c "from src.aggregations import run_all_aggregations; print(run_all_aggregations())"` |

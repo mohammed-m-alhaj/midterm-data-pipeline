@@ -27,6 +27,7 @@ from src.materialized_views import (
     MV_DAILY_SALES,
     refresh_all_materialized_views,
     refresh_daily_sales_summary,
+    refresh_top_products_summary,
 )
 from src.queries import QUERY_REGISTRY, create_phase2_indexes, run_explain_comparison
 from starlette.testclient import TestClient
@@ -89,9 +90,14 @@ def run_different_data_validation():
     print("\n[3] Verifying Materialized Views Incremental Refresh on new dynamic data...")
     target_date = sample_doc["order_date"][:10]
     print(f"  -> Refreshing daily sales targeting date '{target_date}'...")
-    mv_res = refresh_daily_sales_summary(incremental=True, target_dates=[target_date])
-    assert mv_res["status"] in ("SUCCESS", "UP_TO_DATE")
-    print(f"  ✔ MV Incremental Refresh: mode={mv_res['mode']}, affected_keys={mv_res['affected_keys']}, duration={mv_res['duration_ms']}ms")
+    mv_daily_res = refresh_daily_sales_summary(incremental=True, target_dates=[target_date])
+    assert mv_daily_res["status"] in ("SUCCESS", "UP_TO_DATE")
+    print(f"  ✔ Daily Sales Incremental Refresh: mode={mv_daily_res['mode']}, affected_keys={mv_daily_res['affected_keys']}, duration={mv_daily_res['duration_ms']}ms")
+
+    print(f"  -> Refreshing top products summary incrementally...")
+    mv_prod_res = refresh_top_products_summary(incremental=True)
+    assert mv_prod_res["status"] in ("SUCCESS", "UP_TO_DATE")
+    print(f"  ✔ Top Products Incremental Refresh: mode={mv_prod_res['mode']}, affected_keys={mv_prod_res['affected_keys']}, duration={mv_prod_res['duration_ms']}ms")
 
     # 4. Jobs Execution
     print("\n[4] Verifying Scheduled Jobs Execution...")

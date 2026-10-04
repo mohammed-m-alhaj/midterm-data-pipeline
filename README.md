@@ -2,7 +2,7 @@
 ### *Enterprise Hybrid Big Data Pipeline & Analytics Engine: Ingestion (Phase 1) + Analytics & Serving (Phase 2)*
 ### *جامعة الرازي — كلية الحاسوب وتقنية المعلومات — قسم الذكاء الاصطناعي — المستوى الرابع*
 
-[![Tests](https://img.shields.io/badge/PyTest-22%2F22%20Passed%20(100%25)-brightgreen?style=for-the-badge&logo=pytest)](tests/)
+[![Tests](https://img.shields.io/badge/PyTest-23%2F23%20Passed%20(100%25)-brightgreen?style=for-the-badge&logo=pytest)](tests/)
 [![Phase 1 Score](https://img.shields.io/badge/Phase%201%20Midterm-18.0%20%2F%2018.0%20(100%25)-blue?style=for-the-badge)](reports/results.json)
 [![Phase 2 Score](https://img.shields.io/badge/Phase%202%20Final-7.0%20%2F%207.0%20(100%25)-blueviolet?style=for-the-badge)](reports/phase2_evidence/)
 [![Total Score](https://img.shields.io/badge/Total%20Score-25.0%20%2F%2025.0%20(100%25)-gold?style=for-the-badge)](#-13-ربط-معايير-التقييم-الرسمية-بالتنفيذ-الفعلي)
@@ -25,7 +25,7 @@
 | 6 | [📋 6. المتطلبات الأساسية وإعداد البيئة والتثبيت](#-6-المتطلبات-الأساسية-وإعداد-البيئة-والتثبيت) | إعداد Python و MongoDB و Java و Spark والمتغيرات البيئية النظيفة |
 | 7 | [⚡ 7. دليل التشغيل السريع الموحد](#-7-دليل-التشغيل-السريع-الموحد) | أوامر تنفيذ خط البيانات، المعايير، الاختبارات، وخادم FastAPI بخطوة واحدة |
 | 8 | [📊 8. مخرجات التشغيل الفعلية وسجل الإثبات الكامل (25.0 / 25.0 درجة)](#-8-مخرجات-التشغيل-الفعلية-وسجل-الإثبات-الكامل-250--250-درجة) | أدلة رقمية حية لكل معيار من معايير Phase 1 (8.1-8.8) و Phase 2 (8.9-8.15) |
-| 9 | [✅ 9. حزمة الاختبارات الآلية والتحقق (22/22 Passed)](#-9-حزمة-الاختبارات-الآلية-والتحقق-2222-passed) | تفصيل الاختبارات الـ 22 في PyTest التي تغطي كافة القواعد ونقاط النهاية |
+| 9 | [✅ 9. حزمة الاختبارات الآلية والتحقق (23/23 Passed)](#-9-حزمة-الاختبارات-الآلية-والتحقق-2323-passed) | تفصيل الاختبارات الـ 23 في PyTest التي تغطي كافة القواعد ونقاط النهاية |
 | 10 | [🔥 10. مسار المعالجة الموزعة Spark Standalone (Path A)](#-10-مسار-المعالجة-الموزعة-spark-standalone-path-a) | تشغيل وإثبات العنقود المحلي (Master & Worker) وتوزيع الأحمال |
 | 11 | [📐 11. المخططات المعمارية ومخططات التدفق](#-11-المخططات-المعمارية-ومخططات-التدفق) | مخططات Mermaid لمحرك التحويل، قواعد الجودة، دورة اللاتكرارية، والكلاسات |
 | 12 | [⚙️ 12. جدول متغيرات البيئة وإعدادات الأمان](#️-12-جدول-متغيرات-البيئة-وإعدادات-الأمان) | جدول الإعدادات وتأمين المفاتيح والاتصال مع نموذج `example.env` |
@@ -254,7 +254,7 @@ midterm-data-pipeline/
 │   ├── results.json             # نتائج تشغيل Phase 1 الرسمية
 │   ├── screenshots/             # 11 لقطة شاشة توثيقية حية عالية الدقة
 │   └── phase2_evidence/         # أدلة Phase 2 الحية (Explain, Aggs, MVs, Jobs, API)
-├── tests/                       # حزمة الاختبارات الآلية (22/22 اختبار ناجح)
+├── tests/                       # حزمة الاختبارات الآلية (23/23 اختبار ناجح)
 │   ├── test_classification.py   # اختبارات تصنيف العزل والسجلات السليمة
 │   ├── test_cleaning_rules.py   # اختبارات قواعد التنظيف الـ 9 الحتمية
 │   └── test_phase2.py           # اختبارات الفهارس، الاستعلامات، MVs، Jobs، والـ API
@@ -326,7 +326,7 @@ python src/run_phase2_comprehensive_benchmarks.py
 python src/test_different_dataset_live.py
 
 # ==============================================================================
-# الخطوة 4: تشغيل حزمة الاختبارات الآلية الشاملة (22 اختباراً بنسبة نجاح 100%)
+# الخطوة 4: تشغيل حزمة الاختبارات الآلية الشاملة (23 اختباراً بنسبة نجاح 100%)
 # ==============================================================================
 python -m pytest
 
@@ -467,7 +467,7 @@ db.orders_validated.create_index([("delivery_type", 1), ("city", 1)], name="idx_
 
 ---
 
-## ✅ 9. حزمة الاختبارات الآلية والتحقق (22/22 Passed)
+## ✅ 9. حزمة الاختبارات الآلية والتحقق (23/23 Passed)
 
 يتضمن المشروع حزمة اختبارات شاملة باستخدام إطار `PyTest` للتأكد من سلامة كافة مكونات المرحلتين:
 
@@ -475,38 +475,39 @@ db.orders_validated.create_index([("delivery_type", 1), ("city", 1)], name="idx_
 python -m pytest
 ```
 
-**نتيجة التنفيذ الفعلية: نجاح 22 اختباراً من أصل 22 بنسبة 100% في 1.44 ثانية:**
+**نتيجة التنفيذ الفعلية: نجاح 23 اختباراً من أصل 23 بنسبة 100%:**
 
 ```text
 ============================= test session starts =============================
-platform win32 -- Python 3.11.9, pytest-8.3.2, pluggy-1.5.0
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
 rootdir: C:\Users\Al-Haj\Desktop\big-data
 configfile: pytest.ini
 
 tests/test_classification.py::test_quarantine_single_error PASSED        [  4%]
 tests/test_classification.py::test_quarantine_multiple_conflicting_errors PASSED [  9%]
 tests/test_classification.py::test_valid_record_no_errors PASSED         [ 13%]
-tests/test_classification.py::test_quarantine_all_error_codes PASSED     [ 18%]
-tests/test_classification.py::test_corrected_status_distinction PASSED   [ 22%]
-tests/test_cleaning_rules.py::test_arabic_digits_conversion PASSED       [ 27%]
-tests/test_cleaning_rules.py::test_currency_removal PASSED               [ 31%]
-tests/test_cleaning_rules.py::test_thousand_separators PASSED            [ 36%]
-tests/test_cleaning_rules.py::test_price_in_words PASSED                 [ 40%]
-tests/test_cleaning_rules.py::test_phone_normalization PASSED            [ 45%]
-tests/test_cleaning_rules.py::test_email_cleaning PASSED                 [ 50%]
-tests/test_cleaning_rules.py::test_date_format_examples PASSED           [ 54%]
-tests/test_cleaning_rules.py::test_status_standardization PASSED         [ 59%]
-tests/test_cleaning_rules.py::test_whitespace_trimming PASSED            [ 63%]
-tests/test_cleaning_rules.py::test_none_handling PASSED                   [ 68%]
-tests/test_phase2.py::test_phase2_indexes PASSED                         [ 72%]
-tests/test_phase2.py::test_phase2_queries PASSED                         [ 77%]
-tests/test_phase2.py::test_phase2_explain_comparison PASSED              [ 81%]
-tests/test_phase2.py::test_phase2_aggregations PASSED                    [ 86%]
-tests/test_phase2.py::test_phase2_materialized_views PASSED              [ 90%]
-tests/test_phase2.py::test_phase2_jobs PASSED                            [ 95%]
+tests/test_classification.py::test_quarantine_all_error_codes PASSED     [ 17%]
+tests/test_classification.py::test_corrected_status_distinction PASSED   [ 21%]
+tests/test_cleaning_rules.py::test_arabic_digits_conversion PASSED       [ 26%]
+tests/test_cleaning_rules.py::test_currency_removal PASSED               [ 30%]
+tests/test_cleaning_rules.py::test_thousand_separators PASSED            [ 35%]
+tests/test_cleaning_rules.py::test_price_in_words PASSED                 [ 39%]
+tests/test_cleaning_rules.py::test_phone_normalization PASSED            [ 43%]
+tests/test_cleaning_rules.py::test_email_cleaning PASSED                 [ 48%]
+tests/test_cleaning_rules.py::test_date_format_examples PASSED           [ 52%]
+tests/test_cleaning_rules.py::test_status_standardization PASSED         [ 57%]
+tests/test_cleaning_rules.py::test_whitespace_trimming PASSED            [ 61%]
+tests/test_cleaning_rules.py::test_none_handling PASSED                   [ 65%]
+tests/test_phase2.py::test_phase2_indexes PASSED                         [ 70%]
+tests/test_phase2.py::test_phase2_queries PASSED                         [ 74%]
+tests/test_phase2.py::test_phase2_explain_comparison PASSED              [ 78%]
+tests/test_phase2.py::test_phase2_aggregations PASSED                    [ 83%]
+tests/test_phase2.py::test_phase2_materialized_views PASSED              [ 87%]
+tests/test_phase2.py::test_phase2_top_products_incremental_delta_refresh PASSED [ 91%]
+tests/test_phase2.py::test_phase2_jobs PASSED                            [ 96%]
 tests/test_phase2.py::test_phase2_api_endpoints PASSED                   [100%]
 
-============================= 22 passed in 1.44s ==============================
+============================= 23 passed in 28.80s =============================
 ```
 
 ---
@@ -669,7 +670,7 @@ flowchart TD
 | **FastAPI** | 0.115+ | إطار عمل بناء واجهة الـ API وخدمة نقاط النهاية (Phase 2) |
 | **Uvicorn** | 0.30+ | خادم الويب غير المتزامن (ASGI Server) لتشغيل FastAPI |
 | **APScheduler** | 3.10+ | محرك جدولة المهام الدورية الخلفية وإدارتها برمجياً (Phase 2) |
-| **PyTest** | 8.3.2 | إطار تشغيل الاختبارات الآلية الشاملة (22 اختباراً) |
+| **PyTest** | 8.3.2 | إطار تشغيل الاختبارات الآلية الشاملة (23 اختباراً) |
 | **Pydantic** | 2.8+ | التحقق الصارم من مخططات البيانات وعقود الـ API |
 | **SHA-256** | معيار تشفير | توليد بصمة السجلات الحتمية لضمان اللاتكرارية (Idempotency) |
 

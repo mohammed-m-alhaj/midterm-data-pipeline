@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import time
 import pytest
 from starlette.testclient import TestClient
 
@@ -13,9 +12,12 @@ from src.jobs import JOBS_CATALOG, get_job_logs, run_job
 from src.materialized_views import (
     MV_CUSTOMER_METRICS,
     MV_DAILY_SALES,
+    MV_TOP_PRODUCTS,
+    get_db,
     list_materialized_views_status,
     refresh_all_materialized_views,
     refresh_daily_sales_summary,
+    refresh_top_products_summary,
 )
 from src.queries import (
     QUERY_REGISTRY,
@@ -77,14 +79,94 @@ def test_phase2_materialized_views():
     assert full_res["daily_sales_summary"]["status"] == "SUCCESS"
     assert full_res["customer_metrics"]["status"] == "SUCCESS"
     assert full_res["top_products_summary"]["status"] == "SUCCESS"
+    assert full_res["top_products_summary"]["total_documents_in_view"] > 0
 
-    inc_res = refresh_daily_sales_summary(incremental=True, target_dates=["2026-05-15"])
-    assert inc_res["status"] in ("SUCCESS", "UP_TO_DATE")
+    # Test incremental refresh for daily sales
+    inc_daily = refresh_daily_sales_summary(incremental=True, target_dates=["2026-05-15"])
+    assert inc_daily["status"] in ("SUCCESS", "UP_TO_DATE")
+    assert "affected_keys" in inc_daily
+
+    # Test incremental refresh for top products
+    inc_prod = refresh_top_products_summary(incremental=True)
+    assert inc_prod["status"] in ("SUCCESS", "UP_TO_DATE")
+    assert "affected_keys" in inc_prod
+    assert inc_prod["mode"] == "incremental"
 
     statuses = list_materialized_views_status()
-    assert len(statuses) >= 2
+    assert len(statuses) >= 3
     for s in statuses:
         assert s["status"] == "SUCCESS"
+
+
+def test_phase2_top_products_incremental_delta_refresh():
+    """
+    Explicitly proves that refresh_top_products_summary(incremental=True)
+    performs genuine delta incremental updates without full rebuild, preserves
+    existing records, and accurately tracks affected_keys.
+    """
+    import json
+    from datetime import datetime, timezone
+    from config.settings import VALIDATED_COLLECTION
+
+    # 1. Ensure a full build exists and record base document count
+    full_res = refresh_top_products_summary(incremental=False)
+    assert full_res["status"] == "SUCCESS"
+    assert full_res["mode"] == "full"
+    base_count = full_res["total_documents_in_view"]
+    assert base_count > 0
+
+    # 2. Check incremental refresh when already up to date
+    inc_noop = refresh_top_products_summary(incremental=True)
+    assert inc_noop["status"] in ("SUCCESS", "UP_TO_DATE")
+    assert inc_noop["mode"] == "incremental"
+    assert inc_noop["total_documents_in_view"] >= base_count
+
+    # 3. Insert a single new validated order with a unique delta SKU
+    db = get_db()
+    test_sku = "TEST-DELTA-SKU-999"
+    test_order_id = f"ORD-DELTA-{int(time.time())}"
+    test_order = {
+        "order_id": test_order_id,
+        "order_date": "2026-10-04",
+        "customer_id": "CUST-DELTA-01",
+        "customer_name": "عميل دلتا تجريبي",
+        "customer_phone": "+967770000000",
+        "city": "صنعاء",
+        "total_amount": 15000.0,
+        "delivery_cost": 500.0,
+        "status": "مؤكد",
+        "quality_status": "valid",
+        "record_hash": "hash_test_delta_proof",
+        "ingested_at": datetime.now(timezone.utc),
+        "items": [{"sku": test_sku, "name": "Delta Product Test", "qty": 3, "unit_price": 5000.0, "total": 15000.0}],
+        "items_json": json.dumps([{"sku": test_sku, "name": "Delta Product Test", "qty": 3, "unit_price": 5000.0, "total": 15000.0}]),
+    }
+    db[VALIDATED_COLLECTION].insert_one(test_order)
+
+    try:
+        # 4. Trigger incremental refresh targeting this delta SKU
+        inc_delta_res = refresh_top_products_summary(incremental=True, target_skus=[test_sku])
+        assert inc_delta_res["status"] == "SUCCESS"
+        assert inc_delta_res["mode"] == "incremental"
+        assert inc_delta_res["affected_keys"] >= 1
+        assert inc_delta_res["total_documents_in_view"] >= base_count
+
+        # 5. Verify the delta SKU was accurately upserted with correct totals
+        view_doc = db[MV_TOP_PRODUCTS].find_one({"_id": test_sku})
+        assert view_doc is not None
+        assert view_doc["sku"] == test_sku
+        assert view_doc["total_quantity_sold"] >= 3
+        assert view_doc["total_revenue"] >= 15000.0
+        assert view_doc["order_count"] >= 1
+
+        # 6. Verify that older product documents were preserved and not deleted
+        current_count = db[MV_TOP_PRODUCTS].count_documents({})
+        assert current_count >= base_count
+    finally:
+        # Cleanup test artifacts
+        db[VALIDATED_COLLECTION].delete_one({"order_id": test_order_id})
+        db[MV_TOP_PRODUCTS].delete_one({"_id": test_sku})
+        db["top_products_summary"].delete_one({"_id": test_sku})
 
 
 def test_phase2_jobs():

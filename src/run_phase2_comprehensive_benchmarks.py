@@ -27,9 +27,11 @@ from src.jobs import get_job_logs, list_registered_jobs, run_job
 from src.materialized_views import (
     MV_CUSTOMER_METRICS,
     MV_DAILY_SALES,
+    MV_TOP_PRODUCTS,
     list_materialized_views_status,
     refresh_all_materialized_views,
     refresh_daily_sales_summary,
+    refresh_top_products_summary,
 )
 from src.mongo_setup import setup_mongodb
 from src.queries import (
@@ -150,19 +152,25 @@ def run_all_benchmarks():
     print("\n\033[1m\033[93m[3/5] Testing Materialized Views & Incremental Refresh...\033[0m")
     # 1. Full Build
     full_refresh_res = refresh_all_materialized_views(incremental=False)
-    print(f"  ✔ Initial Full Build: Daily Sales ({full_refresh_res['daily_sales_summary']['total_documents_in_view']} docs), Customer Metrics ({full_refresh_res['customer_metrics']['total_documents_in_view']} docs)")
+    print(f"  ✔ Initial Full Build: Daily Sales ({full_refresh_res['daily_sales_summary']['total_documents_in_view']} docs), Customer Metrics ({full_refresh_res['customer_metrics']['total_documents_in_view']} docs), Top Products ({full_refresh_res['top_products_summary']['total_documents_in_view']} docs)")
 
-    # 2. Simulate an update on a specific date to test Incremental refresh
+    # 2. Incremental refresh for daily_sales_summary targeting specific date
     target_date = "2026-05-15"
-    print(f"  -> Performing incremental refresh targeting date '{target_date}'...")
-    inc_res = refresh_daily_sales_summary(incremental=True, target_dates=[target_date])
-    print(f"  ✔ Incremental Refresh result: mode={inc_res['mode']}, affected_keys={inc_res['affected_keys']}, duration={inc_res['duration_ms']}ms")
+    print(f"  -> Performing incremental refresh for daily sales targeting date '{target_date}'...")
+    inc_daily_res = refresh_daily_sales_summary(incremental=True, target_dates=[target_date])
+    print(f"  ✔ Incremental Daily Sales: mode={inc_daily_res['mode']}, affected_keys={inc_daily_res['affected_keys']}, duration={inc_daily_res['duration_ms']}ms")
+
+    # 3. Incremental delta refresh for top_products_summary using watermark
+    print(f"  -> Performing incremental delta refresh for top products summary...")
+    inc_prod_res = refresh_top_products_summary(incremental=True)
+    print(f"  ✔ Incremental Top Products: mode={inc_prod_res['mode']}, status={inc_prod_res['status']}, affected_keys={inc_prod_res['affected_keys']}, duration={inc_prod_res['duration_ms']}ms")
 
     mv_status = list_materialized_views_status()
     with open(EVIDENCE_DIR / "materialized_views_evidence.json", "w", encoding="utf-8") as f:
         json.dump({
             "full_refresh": full_refresh_res,
-            "incremental_refresh_test": inc_res,
+            "incremental_daily_sales_test": inc_daily_res,
+            "incremental_top_products_test": inc_prod_res,
             "views_status": mv_status,
         }, f, ensure_ascii=False, indent=2, default=str)
 

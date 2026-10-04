@@ -4,9 +4,9 @@
       "view_name": "daily_sales_summary",
       "mode": "full",
       "status": "SUCCESS",
-      "affected_keys": 171,
-      "total_documents_in_view": 171,
-      "duration_ms": 55.52
+      "affected_keys": 180,
+      "total_documents_in_view": 180,
+      "duration_ms": 45.97
     },
     "top_products_summary": {
       "view_name": "top_products_summary",
@@ -14,7 +14,7 @@
       "status": "SUCCESS",
       "affected_keys": 92,
       "total_documents_in_view": 92,
-      "duration_ms": 66.51
+      "duration_ms": 54.0
     },
     "customer_metrics": {
       "view_name": "mv_customer_metrics",
@@ -22,56 +22,64 @@
       "status": "SUCCESS",
       "affected_keys": 182,
       "total_documents_in_view": 182,
-      "duration_ms": 57.09
+      "duration_ms": 53.32
     },
-    "refreshed_at": "2026-10-04T18:03:08.957856+00:00",
+    "refreshed_at": "2026-10-04T18:13:57.526707+00:00",
     "incremental": false
   },
-  "incremental_refresh_test": {
+  "incremental_daily_sales_test": {
     "view_name": "daily_sales_summary",
     "mode": "incremental",
     "status": "SUCCESS",
     "affected_keys": 1,
-    "total_documents_in_view": 171,
-    "duration_ms": 33.73
+    "total_documents_in_view": 180,
+    "duration_ms": 9.78
+  },
+  "incremental_top_products_test": {
+    "view_name": "top_products_summary",
+    "mode": "incremental",
+    "status": "UP_TO_DATE",
+    "affected_keys": 0,
+    "total_documents_in_view": 92,
+    "duration_ms": 8.68
   },
   "views_status": [
     {
       "view_name": "mv_daily_sales_summary",
-      "document_count": 171,
-      "last_refreshed_at": "2026-10-04T18:03:08.993377+00:00",
+      "document_count": 180,
+      "last_refreshed_at": "2026-10-04T18:13:57.540270+00:00",
       "last_mode": "incremental",
-      "duration_ms": 33.73,
+      "duration_ms": 9.78,
       "status": "SUCCESS",
       "sample_records": [
         {
-          "date": "2026-02-12",
+          "date": "2026-02-04",
           "order_count": 2,
-          "completed_orders": 1,
+          "completed_orders": 0,
           "pending_orders": 1,
-          "total_sales": 23500.0,
-          "avg_order_value": 11750.0,
-          "total_delivery_fees": 6000.0,
-          "updated_at": "2026-10-04T18:03:08.729938+00:00"
+          "total_sales": 47000.0,
+          "avg_order_value": 23500.0,
+          "total_delivery_fees": 5000.0,
+          "updated_at": "2026-10-04T18:13:57.357136+00:00"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-06-15",
           "order_count": 3,
-          "completed_orders": 0,
-          "pending_orders": 2,
-          "total_sales": 23000.0,
-          "avg_order_value": 7666.67,
-          "total_delivery_fees": 4000.0,
-          "updated_at": "2026-10-04T18:03:08.729938+00:00"
+          "completed_orders": 2,
+          "pending_orders": 1,
+          "total_sales": 28000.0,
+          "avg_order_value": 9333.33,
+          "total_delivery_fees": 7500.0,
+          "updated_at": "2026-10-04T18:13:57.357136+00:00"
         }
       ]
     },
     {
       "view_name": "mv_top_products_summary",
       "document_count": 92,
-      "last_refreshed_at": "2026-10-04T18:03:08.845281+00:00",
-      "last_mode": "full",
-      "duration_ms": 66.51,
+      "last_refreshed_at": "2026-10-04T18:13:57.573692+00:00",
+      "last_mode": "incremental",
+      "duration_ms": 8.68,
       "status": "SUCCESS",
       "sample_records": [
         {
@@ -80,47 +88,47 @@
           "total_quantity_sold": 200,
           "total_revenue": 1000000.0,
           "order_count": 100,
-          "updated_at": "2026-10-04T18:03:08.833772+00:00"
+          "updated_at": "2026-10-04T18:13:57.434633+00:00"
         },
         {
           "sku": "SKU-99",
           "product_name": "منتج تجريبي 9",
-          "total_quantity_sold": 23,
-          "total_revenue": 251000.0,
-          "order_count": 8,
-          "updated_at": "2026-10-04T18:03:08.836772+00:00"
+          "total_quantity_sold": 34,
+          "total_revenue": 325000.0,
+          "order_count": 13,
+          "updated_at": "2026-10-04T18:13:57.437634+00:00"
         }
       ]
     },
     {
       "view_name": "mv_customer_metrics",
       "document_count": 182,
-      "last_refreshed_at": "2026-10-04T18:03:08.939738+00:00",
+      "last_refreshed_at": "2026-10-04T18:13:57.524387+00:00",
       "last_mode": "full",
-      "duration_ms": 57.09,
+      "duration_ms": 53.32,
       "status": "SUCCESS",
       "sample_records": [
         {
-          "customer_id": "CUST-0015",
-          "customer_name": "عميل رقم 15",
-          "customer_phone": "+967771000015",
-          "city": "صنعاء",
-          "order_count": 1,
-          "latest_order_date": "2026-08-20T10:00:00",
-          "total_spend": 12000.0,
-          "avg_order_value": 12000.0,
-          "updated_at": "2026-10-04T18:03:08.926863+00:00"
+          "customer_id": "CUST-DYN-0112",
+          "customer_name": "عميل تجريبي 7",
+          "customer_phone": "+967770119924",
+          "city": "عدن",
+          "order_count": 14,
+          "latest_order_date": "2026-06-21T00:00:00",
+          "total_spend": 310500.0,
+          "avg_order_value": 22178.57,
+          "updated_at": "2026-10-04T18:13:57.511755+00:00"
         },
         {
-          "customer_id": "CUST-DYN-0149",
-          "customer_name": "عميل تجريبي 45",
-          "customer_phone": "+967775834535",
-          "city": "عدن",
-          "order_count": 4,
-          "latest_order_date": "2026-06-24T00:00:00",
-          "total_spend": 56000.0,
-          "avg_order_value": 14000.0,
-          "updated_at": "2026-10-04T18:03:08.926863+00:00"
+          "customer_id": "CUST-DYN-0177",
+          "customer_name": "عميل تجريبي 39",
+          "customer_phone": "+967775069737",
+          "city": "المكلا",
+          "order_count": 12,
+          "latest_order_date": "2026-06-27T00:00:00",
+          "total_spend": 303000.0,
+          "avg_order_value": 25250.0,
+          "updated_at": "2026-10-04T18:13:57.511755+00:00"
         }
       ]
     }
