@@ -6,11 +6,11 @@
       "database": "midterm_pipeline",
       "mongo_uri": "mongodb://127.0.0.1:27017",
       "collections_status": {
-        "orders_raw": 103,
-        "orders_validated": 101,
+        "orders_raw": 561,
+        "orders_validated": 557,
         "orders_quarantine": 0,
-        "mv_daily_sales_summary": 2,
-        "mv_customer_metrics": 101
+        "mv_daily_sales_summary": 171,
+        "mv_customer_metrics": 182
       },
       "scheduler_active": false
     }
@@ -199,7 +199,7 @@
   },
   "GET /queries/orders_by_city_status": {
     "status_code": 200,
-    "count": 0
+    "count": 23
   },
   "GET /queries/orders_by_city_status?explain=true": {
     "status_code": 200,
@@ -211,7 +211,7 @@
   },
   "GET /aggregations/sales_by_city": {
     "status_code": 200,
-    "records_returned": 1
+    "records_returned": 5
   },
   "POST /refresh-mv": {
     "status_code": 200,

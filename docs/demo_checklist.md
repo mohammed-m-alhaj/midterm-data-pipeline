@@ -3,7 +3,7 @@
 
 ---
 
-## 📌 دليل خطوات المناقشة والعرض الحي الشامل (17.0 / 17.0 درجة)
+## 📌 دليل خطوات المناقشة والعرض الحي الشامل (25.0 / 25.0 درجة)
 
 يمكن تنفيذ العرض التقديمي للمشروع أمام لجنة التقييم والأستاذ المشرف عبر اتباع الخطوات المعيارية التالية:
 
@@ -19,7 +19,7 @@
 | **8** | **حزمة الاختبارات الآلية (Phase 1 & 2)** | تشغيل PyTest وإثبات نجاح كافة الاختبارات الـ 22 بنسبة 100% | `python -m pytest` |
 | **9** | **الفهارس وقاعدة ESR (Phase 2)** | إنشاء واستعراض الفهارس المركبة الأربعة المصممة بقاعدة ESR | `python -c "from src.queries import create_phase2_indexes; print(create_phase2_indexes())"` |
 | **10** | **مقارنة Explain قبل وبعد (Phase 2)** | إثبات التحول من `COLLSCAN` إلى `IXSCAN` وخفض الوثائق المفحوصة بنسبة 99.8% | `python -c "from src.queries import run_all_queries; run_all_queries()"` |
-| **11** | **تقارير التجميع الـ 5 (Phase 2)** | تشغيل تقارير التجميع واستعراض بيانات المدن والعملاء والشحن حية | `python -c "from src.aggregations import run_all_aggregations; print(run_all_aggregations())"` |
+| **11** | **تقارير التجميع الـ 6 (Phase 2)** | تشغيل تقارير التجميع واستعراض بيانات المدن والعملاء والشحن والمنتجات حية | `python -c "from src.aggregations import run_all_aggregations; print(run_all_aggregations())"` |
 | **12** | **الجداول المجمعة والتحديث التزايدي (Phase 2)** | إثبات التحديث التزايدي بالعلامة المائية دون مسح الجدول القديم (32ms) | `python -c "from src.materialized_views import refresh_all_materialized_views; print(refresh_all_materialized_views(incremental=True))"` |
 | **13** | **المهام المجدولة وسجلات التنفيذ (Phase 2)** | استعراض سجلات التنفيذ في `job_execution_logs` وتشغيل مهمة يدوياً | `python -c "from src.jobs import run_job_manually; print(run_job_manually('refresh_materialized_views'))"` |
 | **14** | **خادم FastAPI و Swagger UI (Phase 2)** | تشغيل Uvicorn وتصفح Swagger التفاعلي واستعراض الـ 10 Endpoints | `uvicorn src.api:app --host 127.0.0.1 --port 8000` $\rightarrow$ `http://127.0.0.1:8000/docs` |
