@@ -44,10 +44,12 @@ from src.jobs import (
 from src.materialized_views import (
     MV_CUSTOMER_METRICS,
     MV_DAILY_SALES,
+    MV_TOP_PRODUCTS,
     list_materialized_views_status,
     refresh_all_materialized_views,
     refresh_customer_metrics,
     refresh_daily_sales_summary,
+    refresh_top_products_summary,
 )
 from src.metrics import append_run_metrics
 from src.mongo_setup import setup_mongodb
@@ -334,6 +336,7 @@ def list_aggregations() -> Dict[str, Any]:
     return {
         "aggregations": [
             {"name": "sales_by_city", "description": "Total sales volume, order counts, and averages grouped by city."},
+            {"name": "top_products", "description": "Top selling products ranked by revenue, volume, and total units sold."},
             {"name": "top_customers", "description": "Top spending customers, order counts, and average order value."},
             {"name": "sales_by_period", "description": "Chronological revenue trend grouped by date/period."},
             {"name": "orders_by_status", "description": "Distribution of orders by fulfillment and payment status."},
@@ -359,7 +362,7 @@ def execute_aggregation(
         fn = AGGREGATION_REGISTRY[name]
         if name in ("sales_by_city", "top_customers"):
             results = fn(limit=limit, min_orders=min_orders)
-        elif name == "sales_by_period":
+        elif name in ("sales_by_period", "top_products"):
             results = fn(limit=limit)
         else:
             results = fn()
@@ -386,9 +389,12 @@ def trigger_refresh_mv(req: RefreshMVRequest) -> Dict[str, Any]:
     Supports incremental partial sync using delta watermarks.
     """
     try:
-        if req.view_name == MV_DAILY_SALES:
+        view = req.view_name
+        if view in (MV_DAILY_SALES, "daily_sales_summary"):
             res = refresh_daily_sales_summary(incremental=req.incremental)
-        elif req.view_name == MV_CUSTOMER_METRICS:
+        elif view in (MV_TOP_PRODUCTS, "top_products_summary"):
+            res = refresh_top_products_summary(incremental=req.incremental)
+        elif view in (MV_CUSTOMER_METRICS, "customer_metrics"):
             res = refresh_customer_metrics(incremental=req.incremental)
         else:
             res = refresh_all_materialized_views(incremental=req.incremental)

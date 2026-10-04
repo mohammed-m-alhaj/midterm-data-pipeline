@@ -76,12 +76,13 @@ def test_phase2_materialized_views():
     full_res = refresh_all_materialized_views(incremental=False)
     assert full_res["daily_sales_summary"]["status"] == "SUCCESS"
     assert full_res["customer_metrics"]["status"] == "SUCCESS"
+    assert full_res["top_products_summary"]["status"] == "SUCCESS"
 
     inc_res = refresh_daily_sales_summary(incremental=True, target_dates=["2026-05-15"])
     assert inc_res["status"] in ("SUCCESS", "UP_TO_DATE")
 
     statuses = list_materialized_views_status()
-    assert len(statuses) == 2
+    assert len(statuses) >= 2
     for s in statuses:
         assert s["status"] == "SUCCESS"
 

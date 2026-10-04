@@ -1,423 +1,181 @@
 [
   {
-    "job_id": "b76578f1d3fb4dacac288133f519c415",
+    "job_id": "af89fd094a974b6a8113c65a8cd2b3b6",
     "job_name": "generate_analytics_snapshot",
     "schedule": "Every 60 minutes (Interval: 3600s)",
-    "start_time": "2026-10-04T16:47:31.752191+00:00",
-    "end_time": "2026-10-04T16:47:31.840926+00:00",
-    "duration_ms": 88.54,
+    "start_time": "2026-10-04T17:46:18.433524+00:00",
+    "end_time": "2026-10-04T17:46:18.538616+00:00",
+    "duration_ms": 104.68,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
     "metrics": {
-      "snapshot_id": "6a8d352a38984f6d9a427680d9570188",
-      "created_at": "2026-10-04T16:47:31.753487+00:00",
+      "snapshot_id": "cb32708820594880b0c725f83868ba86",
+      "created_at": "2026-10-04T17:46:18.434549+00:00",
       "reports_summary": {
-        "cities_tracked": 7,
+        "cities_tracked": 1,
         "top_customers_count": 10,
-        "days_recorded": 10,
-        "status_combinations": 5,
-        "delivery_routes": 14
+        "days_recorded": 2,
+        "status_combinations": 1,
+        "delivery_routes": 1
       },
       "sales_by_city": [
         {
-          "order_count": 162,
+          "order_count": 101,
           "city": "صنعاء",
-          "total_sales": 2153000.0,
-          "avg_order_value": 13290.12,
-          "max_order_value": 50000.0,
-          "min_order_value": 3500.0,
-          "total_delivery_fees": 317500.0
-        },
-        {
-          "order_count": 68,
-          "city": "عدن",
-          "total_sales": 1225000.0,
-          "avg_order_value": 18014.71,
-          "max_order_value": 50500.0,
-          "min_order_value": 3000.0,
-          "total_delivery_fees": 135000.0
-        },
-        {
-          "order_count": 64,
-          "city": "ذمار",
-          "total_sales": 1187000.0,
-          "avg_order_value": 18546.88,
-          "max_order_value": 51000.0,
-          "min_order_value": 4500.0,
-          "total_delivery_fees": 134500.0
-        },
-        {
-          "order_count": 74,
-          "city": "المكلا",
-          "total_sales": 1102000.0,
-          "avg_order_value": 14891.89,
-          "max_order_value": 51000.0,
-          "min_order_value": 4000.0,
-          "total_delivery_fees": 142000.0
-        },
-        {
-          "order_count": 62,
-          "city": "تعز",
-          "total_sales": 1051000.0,
-          "avg_order_value": 16951.61,
-          "max_order_value": 51000.0,
-          "min_order_value": 3500.0,
-          "total_delivery_fees": 137500.0
-        },
-        {
-          "order_count": 61,
-          "city": "الحديدة",
-          "total_sales": 1006000.0,
-          "avg_order_value": 16491.8,
-          "max_order_value": 51000.0,
-          "min_order_value": 3500.0,
-          "total_delivery_fees": 121000.0
-        },
-        {
-          "order_count": 49,
-          "city": "إب",
-          "total_sales": 751000.0,
-          "avg_order_value": 15326.53,
-          "max_order_value": 50500.0,
-          "min_order_value": 3000.0,
-          "total_delivery_fees": 103000.0
+          "total_sales": 1206000.0,
+          "avg_order_value": 11940.59,
+          "max_order_value": 12000.0,
+          "min_order_value": 6000.0,
+          "total_delivery_fees": 201000.0
         }
       ],
       "top_customers": [
         {
-          "customer_name": "عميل تجريبي 20",
-          "customer_phone": "+967771189598",
-          "city": "الحديدة",
-          "total_orders": 10,
-          "latest_order_date": "2026-06-29T00:00:00",
-          "customer_id": "CUST-DYN-0110",
-          "total_spent": 273000.0,
-          "avg_order_value": 27300.0
-        },
-        {
-          "customer_name": "عميل تجريبي 14",
-          "customer_phone": "+967778634708",
-          "city": "الحديدة",
-          "total_orders": 14,
-          "latest_order_date": "2026-05-30T00:00:00",
-          "customer_id": "CUST-DYN-0140",
-          "total_spent": 264500.0,
-          "avg_order_value": 18892.86
-        },
-        {
-          "customer_name": "عميل تجريبي 38",
-          "customer_phone": "+967775482216",
-          "city": "تعز",
-          "total_orders": 9,
-          "latest_order_date": "2026-05-27T00:00:00",
-          "customer_id": "CUST-DYN-0171",
-          "total_spent": 225500.0,
-          "avg_order_value": 25055.56
-        },
-        {
-          "customer_name": "عميل تجريبي 26",
-          "customer_phone": "+967770522718",
-          "city": "عدن",
-          "total_orders": 10,
-          "latest_order_date": "2026-05-18T00:00:00",
-          "customer_id": "CUST-DYN-0107",
-          "total_spent": 222000.0,
-          "avg_order_value": 22200.0
-        },
-        {
-          "customer_name": "عميل تجريبي 41",
-          "customer_phone": "+967779742127",
-          "city": "إب",
-          "total_orders": 10,
-          "latest_order_date": "2026-06-07T00:00:00",
-          "customer_id": "CUST-DYN-0119",
-          "total_spent": 205000.0,
-          "avg_order_value": 20500.0
-        },
-        {
-          "customer_name": "عميل تجريبي 38",
-          "customer_phone": "+967779658377",
-          "city": "تعز",
-          "total_orders": 8,
-          "latest_order_date": "2026-06-27T00:00:00",
-          "customer_id": "CUST-DYN-0120",
-          "total_spent": 200000.0,
-          "avg_order_value": 25000.0
-        },
-        {
-          "customer_name": "عميل تجريبي 19",
-          "customer_phone": "+967770621339",
-          "city": "المكلا",
-          "total_orders": 11,
-          "latest_order_date": "2026-06-11T00:00:00",
-          "customer_id": "CUST-DYN-0156",
-          "total_spent": 195000.0,
-          "avg_order_value": 17727.27
-        },
-        {
-          "customer_name": "عميل تجريبي 44",
-          "customer_phone": "+967778235930",
-          "city": "المكلا",
-          "total_orders": 7,
-          "latest_order_date": "2026-05-29T00:00:00",
-          "customer_id": "CUST-DYN-0113",
-          "total_spent": 186500.0,
-          "avg_order_value": 26642.86
-        },
-        {
-          "customer_name": "عميل تجريبي 13",
-          "customer_phone": "+967776566806",
+          "customer_name": "عميل رقم 66",
+          "customer_phone": "+967771000066",
           "city": "صنعاء",
-          "total_orders": 7,
-          "latest_order_date": "2026-06-21T00:00:00",
-          "customer_id": "CUST-DYN-0124",
-          "total_spent": 181000.0,
-          "avg_order_value": 25857.14
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0066",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل تجريبي 12",
-          "customer_phone": "+967779453661",
-          "city": "ذمار",
-          "total_orders": 11,
-          "latest_order_date": "2026-05-25T00:00:00",
-          "customer_id": "CUST-DYN-0179",
-          "total_spent": 176500.0,
-          "avg_order_value": 16045.45
+          "customer_name": "عميل رقم 7",
+          "customer_phone": "+967771000007",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0007",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 77",
+          "customer_phone": "+967771000077",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0077",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 34",
+          "customer_phone": "+967771000034",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0034",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 71",
+          "customer_phone": "+967771000071",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0071",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 88",
+          "customer_phone": "+967771000088",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0088",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 80",
+          "customer_phone": "+967771000080",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0080",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 45",
+          "customer_phone": "+967771000045",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0045",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 89",
+          "customer_phone": "+967771000089",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0089",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 11",
+          "customer_phone": "+967771000011",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0011",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
         }
       ],
       "sales_by_period": [
         {
-          "order_count": 1,
-          "period": "2026-08-25",
-          "total_revenue": 7000.0,
-          "avg_daily_order": 7000.0,
-          "total_delivery_revenue": 2000.0
-        },
-        {
           "order_count": 100,
           "period": "2026-08-20",
-          "total_revenue": 1207500.0,
-          "avg_daily_order": 12075.0,
-          "total_delivery_revenue": 207500.0
-        },
-        {
-          "order_count": 3,
-          "period": "2026-06-30",
-          "total_revenue": 29000.0,
-          "avg_daily_order": 9666.67,
-          "total_delivery_revenue": 7000.0
-        },
-        {
-          "order_count": 2,
-          "period": "2026-06-29",
-          "total_revenue": 13500.0,
-          "avg_daily_order": 6750.0,
-          "total_delivery_revenue": 4500.0
+          "total_revenue": 1200000.0,
+          "avg_daily_order": 12000.0,
+          "total_delivery_revenue": 200000.0
         },
         {
           "order_count": 1,
-          "period": "2026-06-28",
-          "total_revenue": 9500.0,
-          "avg_daily_order": 9500.0,
-          "total_delivery_revenue": 2500.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-27",
-          "total_revenue": 50000.0,
-          "avg_daily_order": 50000.0,
-          "total_delivery_revenue": 2000.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-26",
-          "total_revenue": 10000.0,
-          "avg_daily_order": 10000.0,
-          "total_delivery_revenue": 2500.0
-        },
-        {
-          "order_count": 2,
-          "period": "2026-06-25",
-          "total_revenue": 43500.0,
-          "avg_daily_order": 21750.0,
-          "total_delivery_revenue": 3000.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-24",
-          "total_revenue": 14500.0,
-          "avg_daily_order": 14500.0,
-          "total_delivery_revenue": 2500.0
-        },
-        {
-          "order_count": 2,
-          "period": "2026-06-23",
-          "total_revenue": 16000.0,
-          "avg_daily_order": 8000.0,
-          "total_delivery_revenue": 5000.0
+          "period": "2026-05-01",
+          "total_revenue": 6000.0,
+          "avg_daily_order": 6000.0,
+          "total_delivery_revenue": 1000.0
         }
       ],
       "orders_by_status": [
         {
-          "order_count": 141,
-          "order_status": "بانتظار الدفع",
-          "payment_status": "بانتظار الدفع",
-          "total_volume": 2490000.0,
-          "avg_amount": 17659.57
-        },
-        {
-          "order_count": 139,
-          "order_status": "تم الدفع",
-          "payment_status": "تم الدفع",
-          "total_volume": 2139500.0,
-          "avg_amount": 15392.09
-        },
-        {
-          "order_count": 100,
+          "order_count": 101,
           "order_status": "مؤكد",
           "payment_status": "تم الدفع",
-          "total_volume": 1207500.0,
-          "avg_amount": 12075.0
-        },
-        {
-          "order_count": 87,
-          "order_status": "مؤكد",
-          "payment_status": "بانتظار الدفع",
-          "total_volume": 1535000.0,
-          "avg_amount": 17643.68
-        },
-        {
-          "order_count": 73,
-          "order_status": "قيد الشحن",
-          "payment_status": "بانتظار الدفع",
-          "total_volume": 1103000.0,
-          "avg_amount": 15109.59
+          "total_volume": 1206000.0,
+          "avg_amount": 11940.59
         }
       ],
       "delivery_performance": [
         {
-          "total_shipments": 137,
+          "total_shipments": 101,
           "city": "صنعاء",
           "delivery_type": "سريع",
-          "total_delivery_cost": 273000.0,
-          "avg_delivery_cost": 1992.7,
-          "total_merchandise_value": 1751500.0
-        },
-        {
-          "total_shipments": 42,
-          "city": "المكلا",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 78000.0,
-          "avg_delivery_cost": 1857.14,
-          "total_merchandise_value": 684000.0
-        },
-        {
-          "total_shipments": 39,
-          "city": "عدن",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 78500.0,
-          "avg_delivery_cost": 2012.82,
-          "total_merchandise_value": 684000.0
-        },
-        {
-          "total_shipments": 36,
-          "city": "ذمار",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 76500.0,
-          "avg_delivery_cost": 2125.0,
-          "total_merchandise_value": 586000.0
-        },
-        {
-          "total_shipments": 33,
-          "city": "تعز",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 73000.0,
-          "avg_delivery_cost": 2212.12,
-          "total_merchandise_value": 502000.0
-        },
-        {
-          "total_shipments": 32,
-          "city": "المكلا",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 64000.0,
-          "avg_delivery_cost": 2000.0,
-          "total_merchandise_value": 418000.0
-        },
-        {
-          "total_shipments": 31,
-          "city": "الحديدة",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 63500.0,
-          "avg_delivery_cost": 2048.39,
-          "total_merchandise_value": 602500.0
-        },
-        {
-          "total_shipments": 30,
-          "city": "الحديدة",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 57500.0,
-          "avg_delivery_cost": 1916.67,
-          "total_merchandise_value": 403500.0
-        },
-        {
-          "total_shipments": 29,
-          "city": "عدن",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 56500.0,
-          "avg_delivery_cost": 1948.28,
-          "total_merchandise_value": 541000.0
-        },
-        {
-          "total_shipments": 29,
-          "city": "تعز",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 64500.0,
-          "avg_delivery_cost": 2224.14,
-          "total_merchandise_value": 549000.0
-        },
-        {
-          "total_shipments": 28,
-          "city": "ذمار",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 58000.0,
-          "avg_delivery_cost": 2071.43,
-          "total_merchandise_value": 601000.0
-        },
-        {
-          "total_shipments": 25,
-          "city": "إب",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 52500.0,
-          "avg_delivery_cost": 2100.0,
-          "total_merchandise_value": 429500.0
-        },
-        {
-          "total_shipments": 25,
-          "city": "صنعاء",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 44500.0,
-          "avg_delivery_cost": 1780.0,
-          "total_merchandise_value": 401500.0
-        },
-        {
-          "total_shipments": 24,
-          "city": "إب",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 50500.0,
-          "avg_delivery_cost": 2104.17,
-          "total_merchandise_value": 321500.0
+          "total_delivery_cost": 201000.0,
+          "avg_delivery_cost": 1990.1,
+          "total_merchandise_value": 1206000.0
         }
       ]
     }
   },
   {
-    "job_id": "732171047a5546328974793fb313e309",
+    "job_id": "995c7b1ec18e4a02b9bac8796e484006",
     "job_name": "refresh_materialized_views",
     "schedule": "Every 30 minutes (Interval: 1800s)",
-    "start_time": "2026-10-04T16:47:31.641851+00:00",
-    "end_time": "2026-10-04T16:47:31.750190+00:00",
-    "duration_ms": 108.03,
+    "start_time": "2026-10-04T17:46:18.244076+00:00",
+    "end_time": "2026-10-04T17:46:18.430906+00:00",
+    "duration_ms": 187.15,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
@@ -427,468 +185,34 @@
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 33.99
+        "duration_ms": 44.79
       },
-      "customer_metrics": {
-        "view_name": "mv_customer_metrics",
-        "mode": "incremental",
-        "status": "UP_TO_DATE",
-        "affected_keys": 0,
-        "duration_ms": 31.04
-      },
-      "refreshed_at": "2026-10-04T16:47:31.750190+00:00",
-      "incremental": true
-    }
-  },
-  {
-    "job_id": "da1e3a76d5704b7eb600b49c503141ed",
-    "job_name": "generate_analytics_snapshot",
-    "schedule": "Every 60 minutes (Interval: 3600s)",
-    "start_time": "2026-10-04T16:47:07.079905+00:00",
-    "end_time": "2026-10-04T16:47:07.157004+00:00",
-    "duration_ms": 77.47,
-    "success": true,
-    "status": "SUCCESS",
-    "error_details": null,
-    "metrics": {
-      "snapshot_id": "0c3c19f31d7d4d8eba60a1de00af2ad7",
-      "created_at": "2026-10-04T16:47:07.080903+00:00",
-      "reports_summary": {
-        "cities_tracked": 7,
-        "top_customers_count": 10,
-        "days_recorded": 10,
-        "status_combinations": 5,
-        "delivery_routes": 14
-      },
-      "sales_by_city": [
-        {
-          "order_count": 162,
-          "city": "صنعاء",
-          "total_sales": 2153000.0,
-          "avg_order_value": 13290.12,
-          "max_order_value": 50000.0,
-          "min_order_value": 3500.0,
-          "total_delivery_fees": 317500.0
-        },
-        {
-          "order_count": 68,
-          "city": "عدن",
-          "total_sales": 1225000.0,
-          "avg_order_value": 18014.71,
-          "max_order_value": 50500.0,
-          "min_order_value": 3000.0,
-          "total_delivery_fees": 135000.0
-        },
-        {
-          "order_count": 64,
-          "city": "ذمار",
-          "total_sales": 1187000.0,
-          "avg_order_value": 18546.88,
-          "max_order_value": 51000.0,
-          "min_order_value": 4500.0,
-          "total_delivery_fees": 134500.0
-        },
-        {
-          "order_count": 74,
-          "city": "المكلا",
-          "total_sales": 1102000.0,
-          "avg_order_value": 14891.89,
-          "max_order_value": 51000.0,
-          "min_order_value": 4000.0,
-          "total_delivery_fees": 142000.0
-        },
-        {
-          "order_count": 62,
-          "city": "تعز",
-          "total_sales": 1051000.0,
-          "avg_order_value": 16951.61,
-          "max_order_value": 51000.0,
-          "min_order_value": 3500.0,
-          "total_delivery_fees": 137500.0
-        },
-        {
-          "order_count": 61,
-          "city": "الحديدة",
-          "total_sales": 1006000.0,
-          "avg_order_value": 16491.8,
-          "max_order_value": 51000.0,
-          "min_order_value": 3500.0,
-          "total_delivery_fees": 121000.0
-        },
-        {
-          "order_count": 49,
-          "city": "إب",
-          "total_sales": 751000.0,
-          "avg_order_value": 15326.53,
-          "max_order_value": 50500.0,
-          "min_order_value": 3000.0,
-          "total_delivery_fees": 103000.0
-        }
-      ],
-      "top_customers": [
-        {
-          "customer_name": "عميل تجريبي 20",
-          "customer_phone": "+967771189598",
-          "city": "الحديدة",
-          "total_orders": 10,
-          "latest_order_date": "2026-06-29T00:00:00",
-          "customer_id": "CUST-DYN-0110",
-          "total_spent": 273000.0,
-          "avg_order_value": 27300.0
-        },
-        {
-          "customer_name": "عميل تجريبي 14",
-          "customer_phone": "+967778634708",
-          "city": "الحديدة",
-          "total_orders": 14,
-          "latest_order_date": "2026-05-30T00:00:00",
-          "customer_id": "CUST-DYN-0140",
-          "total_spent": 264500.0,
-          "avg_order_value": 18892.86
-        },
-        {
-          "customer_name": "عميل تجريبي 38",
-          "customer_phone": "+967775482216",
-          "city": "تعز",
-          "total_orders": 9,
-          "latest_order_date": "2026-05-27T00:00:00",
-          "customer_id": "CUST-DYN-0171",
-          "total_spent": 225500.0,
-          "avg_order_value": 25055.56
-        },
-        {
-          "customer_name": "عميل تجريبي 26",
-          "customer_phone": "+967770522718",
-          "city": "عدن",
-          "total_orders": 10,
-          "latest_order_date": "2026-05-18T00:00:00",
-          "customer_id": "CUST-DYN-0107",
-          "total_spent": 222000.0,
-          "avg_order_value": 22200.0
-        },
-        {
-          "customer_name": "عميل تجريبي 41",
-          "customer_phone": "+967779742127",
-          "city": "إب",
-          "total_orders": 10,
-          "latest_order_date": "2026-06-07T00:00:00",
-          "customer_id": "CUST-DYN-0119",
-          "total_spent": 205000.0,
-          "avg_order_value": 20500.0
-        },
-        {
-          "customer_name": "عميل تجريبي 38",
-          "customer_phone": "+967779658377",
-          "city": "تعز",
-          "total_orders": 8,
-          "latest_order_date": "2026-06-27T00:00:00",
-          "customer_id": "CUST-DYN-0120",
-          "total_spent": 200000.0,
-          "avg_order_value": 25000.0
-        },
-        {
-          "customer_name": "عميل تجريبي 19",
-          "customer_phone": "+967770621339",
-          "city": "المكلا",
-          "total_orders": 11,
-          "latest_order_date": "2026-06-11T00:00:00",
-          "customer_id": "CUST-DYN-0156",
-          "total_spent": 195000.0,
-          "avg_order_value": 17727.27
-        },
-        {
-          "customer_name": "عميل تجريبي 44",
-          "customer_phone": "+967778235930",
-          "city": "المكلا",
-          "total_orders": 7,
-          "latest_order_date": "2026-05-29T00:00:00",
-          "customer_id": "CUST-DYN-0113",
-          "total_spent": 186500.0,
-          "avg_order_value": 26642.86
-        },
-        {
-          "customer_name": "عميل تجريبي 13",
-          "customer_phone": "+967776566806",
-          "city": "صنعاء",
-          "total_orders": 7,
-          "latest_order_date": "2026-06-21T00:00:00",
-          "customer_id": "CUST-DYN-0124",
-          "total_spent": 181000.0,
-          "avg_order_value": 25857.14
-        },
-        {
-          "customer_name": "عميل تجريبي 12",
-          "customer_phone": "+967779453661",
-          "city": "ذمار",
-          "total_orders": 11,
-          "latest_order_date": "2026-05-25T00:00:00",
-          "customer_id": "CUST-DYN-0179",
-          "total_spent": 176500.0,
-          "avg_order_value": 16045.45
-        }
-      ],
-      "sales_by_period": [
-        {
-          "order_count": 1,
-          "period": "2026-08-25",
-          "total_revenue": 7000.0,
-          "avg_daily_order": 7000.0,
-          "total_delivery_revenue": 2000.0
-        },
-        {
-          "order_count": 100,
-          "period": "2026-08-20",
-          "total_revenue": 1207500.0,
-          "avg_daily_order": 12075.0,
-          "total_delivery_revenue": 207500.0
-        },
-        {
-          "order_count": 3,
-          "period": "2026-06-30",
-          "total_revenue": 29000.0,
-          "avg_daily_order": 9666.67,
-          "total_delivery_revenue": 7000.0
-        },
-        {
-          "order_count": 2,
-          "period": "2026-06-29",
-          "total_revenue": 13500.0,
-          "avg_daily_order": 6750.0,
-          "total_delivery_revenue": 4500.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-28",
-          "total_revenue": 9500.0,
-          "avg_daily_order": 9500.0,
-          "total_delivery_revenue": 2500.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-27",
-          "total_revenue": 50000.0,
-          "avg_daily_order": 50000.0,
-          "total_delivery_revenue": 2000.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-26",
-          "total_revenue": 10000.0,
-          "avg_daily_order": 10000.0,
-          "total_delivery_revenue": 2500.0
-        },
-        {
-          "order_count": 2,
-          "period": "2026-06-25",
-          "total_revenue": 43500.0,
-          "avg_daily_order": 21750.0,
-          "total_delivery_revenue": 3000.0
-        },
-        {
-          "order_count": 1,
-          "period": "2026-06-24",
-          "total_revenue": 14500.0,
-          "avg_daily_order": 14500.0,
-          "total_delivery_revenue": 2500.0
-        },
-        {
-          "order_count": 2,
-          "period": "2026-06-23",
-          "total_revenue": 16000.0,
-          "avg_daily_order": 8000.0,
-          "total_delivery_revenue": 5000.0
-        }
-      ],
-      "orders_by_status": [
-        {
-          "order_count": 141,
-          "order_status": "بانتظار الدفع",
-          "payment_status": "بانتظار الدفع",
-          "total_volume": 2490000.0,
-          "avg_amount": 17659.57
-        },
-        {
-          "order_count": 139,
-          "order_status": "تم الدفع",
-          "payment_status": "تم الدفع",
-          "total_volume": 2139500.0,
-          "avg_amount": 15392.09
-        },
-        {
-          "order_count": 100,
-          "order_status": "مؤكد",
-          "payment_status": "تم الدفع",
-          "total_volume": 1207500.0,
-          "avg_amount": 12075.0
-        },
-        {
-          "order_count": 87,
-          "order_status": "مؤكد",
-          "payment_status": "بانتظار الدفع",
-          "total_volume": 1535000.0,
-          "avg_amount": 17643.68
-        },
-        {
-          "order_count": 73,
-          "order_status": "قيد الشحن",
-          "payment_status": "بانتظار الدفع",
-          "total_volume": 1103000.0,
-          "avg_amount": 15109.59
-        }
-      ],
-      "delivery_performance": [
-        {
-          "total_shipments": 137,
-          "city": "صنعاء",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 273000.0,
-          "avg_delivery_cost": 1992.7,
-          "total_merchandise_value": 1751500.0
-        },
-        {
-          "total_shipments": 42,
-          "city": "المكلا",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 78000.0,
-          "avg_delivery_cost": 1857.14,
-          "total_merchandise_value": 684000.0
-        },
-        {
-          "total_shipments": 39,
-          "city": "عدن",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 78500.0,
-          "avg_delivery_cost": 2012.82,
-          "total_merchandise_value": 684000.0
-        },
-        {
-          "total_shipments": 36,
-          "city": "ذمار",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 76500.0,
-          "avg_delivery_cost": 2125.0,
-          "total_merchandise_value": 586000.0
-        },
-        {
-          "total_shipments": 33,
-          "city": "تعز",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 73000.0,
-          "avg_delivery_cost": 2212.12,
-          "total_merchandise_value": 502000.0
-        },
-        {
-          "total_shipments": 32,
-          "city": "المكلا",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 64000.0,
-          "avg_delivery_cost": 2000.0,
-          "total_merchandise_value": 418000.0
-        },
-        {
-          "total_shipments": 31,
-          "city": "الحديدة",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 63500.0,
-          "avg_delivery_cost": 2048.39,
-          "total_merchandise_value": 602500.0
-        },
-        {
-          "total_shipments": 30,
-          "city": "الحديدة",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 57500.0,
-          "avg_delivery_cost": 1916.67,
-          "total_merchandise_value": 403500.0
-        },
-        {
-          "total_shipments": 29,
-          "city": "عدن",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 56500.0,
-          "avg_delivery_cost": 1948.28,
-          "total_merchandise_value": 541000.0
-        },
-        {
-          "total_shipments": 29,
-          "city": "تعز",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 64500.0,
-          "avg_delivery_cost": 2224.14,
-          "total_merchandise_value": 549000.0
-        },
-        {
-          "total_shipments": 28,
-          "city": "ذمار",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 58000.0,
-          "avg_delivery_cost": 2071.43,
-          "total_merchandise_value": 601000.0
-        },
-        {
-          "total_shipments": 25,
-          "city": "إب",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 52500.0,
-          "avg_delivery_cost": 2100.0,
-          "total_merchandise_value": 429500.0
-        },
-        {
-          "total_shipments": 25,
-          "city": "صنعاء",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 44500.0,
-          "avg_delivery_cost": 1780.0,
-          "total_merchandise_value": 401500.0
-        },
-        {
-          "total_shipments": 24,
-          "city": "إب",
-          "delivery_type": "سريع",
-          "total_delivery_cost": 50500.0,
-          "avg_delivery_cost": 2104.17,
-          "total_merchandise_value": 321500.0
-        }
-      ]
-    }
-  },
-  {
-    "job_id": "6fd32618b8b54cdab45c633a5b30d863",
-    "job_name": "refresh_materialized_views",
-    "schedule": "Every 30 minutes (Interval: 1800s)",
-    "start_time": "2026-10-04T16:47:06.959391+00:00",
-    "end_time": "2026-10-04T16:47:07.064682+00:00",
-    "duration_ms": 104.92,
-    "success": true,
-    "status": "SUCCESS",
-    "error_details": null,
-    "metrics": {
-      "daily_sales_summary": {
-        "view_name": "mv_daily_sales_summary",
-        "mode": "incremental",
-        "status": "UP_TO_DATE",
-        "affected_keys": 0,
-        "duration_ms": 43.73
-      },
-      "customer_metrics": {
-        "view_name": "mv_customer_metrics",
+      "top_products_summary": {
+        "view_name": "top_products_summary",
         "mode": "incremental",
         "status": "SUCCESS",
-        "affected_keys": 81,
-        "total_documents_in_view": 182,
-        "duration_ms": 21.74
+        "affected_keys": 2,
+        "total_documents_in_view": 2,
+        "duration_ms": 32.19
       },
-      "refreshed_at": "2026-10-04T16:47:07.064682+00:00",
+      "customer_metrics": {
+        "view_name": "mv_customer_metrics",
+        "mode": "incremental",
+        "status": "UP_TO_DATE",
+        "affected_keys": 0,
+        "duration_ms": 31.72
+      },
+      "refreshed_at": "2026-10-04T17:46:18.430906+00:00",
       "incremental": true
     }
   },
   {
-    "job_id": "1a695e40decc46eea016356c526847fb",
+    "job_id": "5c06aeb497274e4bb8cac022e4e4dc9a",
     "job_name": "refresh_materialized_views",
     "schedule": "Every 30 minutes (Interval: 1800s)",
-    "start_time": "2026-10-04T16:40:03.528373+00:00",
-    "end_time": "2026-10-04T16:40:03.634039+00:00",
-    "duration_ms": 106.32,
+    "start_time": "2026-10-04T17:45:56.208945+00:00",
+    "end_time": "2026-10-04T17:45:56.322179+00:00",
+    "duration_ms": 112.54,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
@@ -898,220 +222,204 @@
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 43.75
+        "duration_ms": 33.41
+      },
+      "top_products_summary": {
+        "view_name": "top_products_summary",
+        "mode": "incremental",
+        "status": "SUCCESS",
+        "affected_keys": 2,
+        "total_documents_in_view": 2,
+        "duration_ms": 37.81
       },
       "customer_metrics": {
         "view_name": "mv_customer_metrics",
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 20.72
+        "duration_ms": 21.91
       },
-      "refreshed_at": "2026-10-04T16:40:03.634039+00:00",
+      "refreshed_at": "2026-10-04T17:45:56.322179+00:00",
       "incremental": true
     }
   },
   {
-    "job_id": "3913f0583b2a42778397623b752b1c60",
+    "job_id": "853dabdf47454a8f987b7b7d19e79d47",
     "job_name": "generate_analytics_snapshot",
     "schedule": "Every 60 minutes (Interval: 3600s)",
-    "start_time": "2026-10-04T16:40:03.362232+00:00",
-    "end_time": "2026-10-04T16:40:03.425425+00:00",
-    "duration_ms": 63.68,
+    "start_time": "2026-10-04T17:45:38.567295+00:00",
+    "end_time": "2026-10-04T17:45:38.656259+00:00",
+    "duration_ms": 88.44,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
     "metrics": {
-      "snapshot_id": "4b9ec49ffe9045c9ade7ae0bbf26e6f2",
-      "created_at": "2026-10-04T16:40:03.362232+00:00",
+      "snapshot_id": "f929e7e51b844e839339837f7f7a5c11",
+      "created_at": "2026-10-04T17:45:38.569450+00:00",
       "reports_summary": {
-        "cities_tracked": 2,
+        "cities_tracked": 1,
         "top_customers_count": 10,
         "days_recorded": 2,
-        "status_combinations": 2,
-        "delivery_routes": 2
+        "status_combinations": 1,
+        "delivery_routes": 1
       },
       "sales_by_city": [
         {
-          "order_count": 100,
+          "order_count": 101,
           "city": "صنعاء",
-          "total_sales": 1207500.0,
-          "avg_order_value": 12075.0,
-          "max_order_value": 19500.0,
-          "min_order_value": 12000.0,
-          "total_delivery_fees": 207500.0
-        },
-        {
-          "order_count": 1,
-          "city": "عدن",
-          "total_sales": 7000.0,
-          "avg_order_value": 7000.0,
-          "max_order_value": 7000.0,
-          "min_order_value": 7000.0,
-          "total_delivery_fees": 2000.0
+          "total_sales": 1206000.0,
+          "avg_order_value": 11940.59,
+          "max_order_value": 12000.0,
+          "min_order_value": 6000.0,
+          "total_delivery_fees": 201000.0
         }
       ],
       "top_customers": [
         {
-          "customer_name": "عميل رقم 0",
-          "customer_phone": "+967779998877",
+          "customer_name": "عميل رقم 61",
+          "customer_phone": "+967771000061",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0000",
-          "total_spent": 19500.0,
-          "avg_order_value": 19500.0
-        },
-        {
-          "customer_name": "عميل رقم 46",
-          "customer_phone": "+967771000046",
-          "city": "صنعاء",
-          "total_orders": 1,
-          "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0046",
+          "customer_id": "CUST-0061",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 69",
-          "customer_phone": "+967771000069",
+          "customer_name": "عميل رقم 51",
+          "customer_phone": "+967771000051",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0069",
+          "customer_id": "CUST-0051",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 32",
-          "customer_phone": "+967771000032",
+          "customer_name": "عميل رقم 36",
+          "customer_phone": "+967771000036",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0032",
+          "customer_id": "CUST-0036",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 14",
-          "customer_phone": "+967771000014",
+          "customer_name": "عميل رقم 50",
+          "customer_phone": "+967771000050",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0014",
+          "customer_id": "CUST-0050",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 39",
-          "customer_phone": "+967771000039",
+          "customer_name": "عميل رقم 93",
+          "customer_phone": "+967771000093",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0039",
+          "customer_id": "CUST-0093",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 30",
-          "customer_phone": "+967771000030",
+          "customer_name": "عميل رقم 26",
+          "customer_phone": "+967771000026",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0030",
+          "customer_id": "CUST-0026",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 10",
-          "customer_phone": "+967771000010",
+          "customer_name": "عميل رقم 21",
+          "customer_phone": "+967771000021",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0010",
+          "customer_id": "CUST-0021",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 23",
-          "customer_phone": "+967771000023",
+          "customer_name": "عميل رقم 83",
+          "customer_phone": "+967771000083",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0023",
+          "customer_id": "CUST-0083",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 47",
-          "customer_phone": "+967771000047",
+          "customer_name": "عميل رقم 20",
+          "customer_phone": "+967771000020",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0047",
+          "customer_id": "CUST-0020",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 62",
+          "customer_phone": "+967771000062",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0062",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         }
       ],
       "sales_by_period": [
         {
-          "order_count": 1,
-          "period": "2026-08-25",
-          "total_revenue": 7000.0,
-          "avg_daily_order": 7000.0,
-          "total_delivery_revenue": 2000.0
-        },
-        {
           "order_count": 100,
           "period": "2026-08-20",
-          "total_revenue": 1207500.0,
-          "avg_daily_order": 12075.0,
-          "total_delivery_revenue": 207500.0
+          "total_revenue": 1200000.0,
+          "avg_daily_order": 12000.0,
+          "total_delivery_revenue": 200000.0
+        },
+        {
+          "order_count": 1,
+          "period": "2026-05-01",
+          "total_revenue": 6000.0,
+          "avg_daily_order": 6000.0,
+          "total_delivery_revenue": 1000.0
         }
       ],
       "orders_by_status": [
         {
-          "order_count": 100,
+          "order_count": 101,
           "order_status": "مؤكد",
           "payment_status": "تم الدفع",
-          "total_volume": 1207500.0,
-          "avg_amount": 12075.0
-        },
-        {
-          "order_count": 1,
-          "order_status": "تم الدفع",
-          "payment_status": "تم الدفع",
-          "total_volume": 7000.0,
-          "avg_amount": 7000.0
+          "total_volume": 1206000.0,
+          "avg_amount": 11940.59
         }
       ],
       "delivery_performance": [
         {
-          "total_shipments": 100,
+          "total_shipments": 101,
           "city": "صنعاء",
           "delivery_type": "سريع",
-          "total_delivery_cost": 207500.0,
-          "avg_delivery_cost": 2075.0,
-          "total_merchandise_value": 1207500.0
-        },
-        {
-          "total_shipments": 1,
-          "city": "عدن",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 2000.0,
-          "avg_delivery_cost": 2000.0,
-          "total_merchandise_value": 7000.0
+          "total_delivery_cost": 201000.0,
+          "avg_delivery_cost": 1990.1,
+          "total_merchandise_value": 1206000.0
         }
       ]
     }
   },
   {
-    "job_id": "15df76d0adeb4f5d8cf409715b20522e",
+    "job_id": "aa5148eb620c48d1bb985c088ae7acc7",
     "job_name": "refresh_materialized_views",
     "schedule": "Every 30 minutes (Interval: 1800s)",
-    "start_time": "2026-10-04T16:40:03.283186+00:00",
-    "end_time": "2026-10-04T16:40:03.356622+00:00",
-    "duration_ms": 73.8,
+    "start_time": "2026-10-04T17:45:38.347462+00:00",
+    "end_time": "2026-10-04T17:45:38.561842+00:00",
+    "duration_ms": 214.87,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
@@ -1121,220 +429,204 @@
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 6.88
+        "duration_ms": 43.15
+      },
+      "top_products_summary": {
+        "view_name": "top_products_summary",
+        "mode": "incremental",
+        "status": "SUCCESS",
+        "affected_keys": 2,
+        "total_documents_in_view": 2,
+        "duration_ms": 47.69
       },
       "customer_metrics": {
         "view_name": "mv_customer_metrics",
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 29.01
+        "duration_ms": 44.34
       },
-      "refreshed_at": "2026-10-04T16:40:03.356622+00:00",
+      "refreshed_at": "2026-10-04T17:45:38.561842+00:00",
       "incremental": true
     }
   },
   {
-    "job_id": "a25255cf13034967aee5036a77b3bf61",
+    "job_id": "c0f863e4fd894c0587f79b071461af30",
     "job_name": "generate_analytics_snapshot",
     "schedule": "Every 60 minutes (Interval: 3600s)",
-    "start_time": "2026-10-04T16:40:03.124778+00:00",
-    "end_time": "2026-10-04T16:40:03.233323+00:00",
-    "duration_ms": 108.86,
+    "start_time": "2026-10-04T17:45:38.213190+00:00",
+    "end_time": "2026-10-04T17:45:38.286922+00:00",
+    "duration_ms": 73.34,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
     "metrics": {
-      "snapshot_id": "3a609f4c7a784316baff337b5298ad09",
-      "created_at": "2026-10-04T16:40:03.125796+00:00",
+      "snapshot_id": "93c7989b82754a7d95a827e2bf1eb41b",
+      "created_at": "2026-10-04T17:45:38.214249+00:00",
       "reports_summary": {
-        "cities_tracked": 2,
+        "cities_tracked": 1,
         "top_customers_count": 10,
         "days_recorded": 2,
-        "status_combinations": 2,
-        "delivery_routes": 2
+        "status_combinations": 1,
+        "delivery_routes": 1
       },
       "sales_by_city": [
         {
-          "order_count": 100,
+          "order_count": 101,
           "city": "صنعاء",
-          "total_sales": 1207500.0,
-          "avg_order_value": 12075.0,
-          "max_order_value": 19500.0,
-          "min_order_value": 12000.0,
-          "total_delivery_fees": 207500.0
-        },
-        {
-          "order_count": 1,
-          "city": "عدن",
-          "total_sales": 7000.0,
-          "avg_order_value": 7000.0,
-          "max_order_value": 7000.0,
-          "min_order_value": 7000.0,
-          "total_delivery_fees": 2000.0
+          "total_sales": 1206000.0,
+          "avg_order_value": 11940.59,
+          "max_order_value": 12000.0,
+          "min_order_value": 6000.0,
+          "total_delivery_fees": 201000.0
         }
       ],
       "top_customers": [
         {
-          "customer_name": "عميل رقم 0",
-          "customer_phone": "+967779998877",
+          "customer_name": "عميل رقم 66",
+          "customer_phone": "+967771000066",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0000",
-          "total_spent": 19500.0,
-          "avg_order_value": 19500.0
-        },
-        {
-          "customer_name": "عميل رقم 55",
-          "customer_phone": "+967771000055",
-          "city": "صنعاء",
-          "total_orders": 1,
-          "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0055",
+          "customer_id": "CUST-0066",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 42",
-          "customer_phone": "+967771000042",
+          "customer_name": "عميل رقم 7",
+          "customer_phone": "+967771000007",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0042",
+          "customer_id": "CUST-0007",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 57",
-          "customer_phone": "+967771000057",
+          "customer_name": "عميل رقم 77",
+          "customer_phone": "+967771000077",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0057",
+          "customer_id": "CUST-0077",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 41",
-          "customer_phone": "+967771000041",
+          "customer_name": "عميل رقم 34",
+          "customer_phone": "+967771000034",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0041",
+          "customer_id": "CUST-0034",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 31",
-          "customer_phone": "+967771000031",
+          "customer_name": "عميل رقم 71",
+          "customer_phone": "+967771000071",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0031",
+          "customer_id": "CUST-0071",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 56",
-          "customer_phone": "+967771000056",
+          "customer_name": "عميل رقم 88",
+          "customer_phone": "+967771000088",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0056",
+          "customer_id": "CUST-0088",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 19",
-          "customer_phone": "+967771000019",
+          "customer_name": "عميل رقم 80",
+          "customer_phone": "+967771000080",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0019",
+          "customer_id": "CUST-0080",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 18",
-          "customer_phone": "+967771000018",
+          "customer_name": "عميل رقم 45",
+          "customer_phone": "+967771000045",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0018",
+          "customer_id": "CUST-0045",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         },
         {
-          "customer_name": "عميل رقم 54",
-          "customer_phone": "+967771000054",
+          "customer_name": "عميل رقم 89",
+          "customer_phone": "+967771000089",
           "city": "صنعاء",
           "total_orders": 1,
           "latest_order_date": "2026-08-20T10:00:00",
-          "customer_id": "CUST-0054",
+          "customer_id": "CUST-0089",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 11",
+          "customer_phone": "+967771000011",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0011",
           "total_spent": 12000.0,
           "avg_order_value": 12000.0
         }
       ],
       "sales_by_period": [
         {
-          "order_count": 1,
-          "period": "2026-08-25",
-          "total_revenue": 7000.0,
-          "avg_daily_order": 7000.0,
-          "total_delivery_revenue": 2000.0
-        },
-        {
           "order_count": 100,
           "period": "2026-08-20",
-          "total_revenue": 1207500.0,
-          "avg_daily_order": 12075.0,
-          "total_delivery_revenue": 207500.0
+          "total_revenue": 1200000.0,
+          "avg_daily_order": 12000.0,
+          "total_delivery_revenue": 200000.0
+        },
+        {
+          "order_count": 1,
+          "period": "2026-05-01",
+          "total_revenue": 6000.0,
+          "avg_daily_order": 6000.0,
+          "total_delivery_revenue": 1000.0
         }
       ],
       "orders_by_status": [
         {
-          "order_count": 100,
+          "order_count": 101,
           "order_status": "مؤكد",
           "payment_status": "تم الدفع",
-          "total_volume": 1207500.0,
-          "avg_amount": 12075.0
-        },
-        {
-          "order_count": 1,
-          "order_status": "تم الدفع",
-          "payment_status": "تم الدفع",
-          "total_volume": 7000.0,
-          "avg_amount": 7000.0
+          "total_volume": 1206000.0,
+          "avg_amount": 11940.59
         }
       ],
       "delivery_performance": [
         {
-          "total_shipments": 100,
+          "total_shipments": 101,
           "city": "صنعاء",
           "delivery_type": "سريع",
-          "total_delivery_cost": 207500.0,
-          "avg_delivery_cost": 2075.0,
-          "total_merchandise_value": 1207500.0
-        },
-        {
-          "total_shipments": 1,
-          "city": "عدن",
-          "delivery_type": "عادي",
-          "total_delivery_cost": 2000.0,
-          "avg_delivery_cost": 2000.0,
-          "total_merchandise_value": 7000.0
+          "total_delivery_cost": 201000.0,
+          "avg_delivery_cost": 1990.1,
+          "total_merchandise_value": 1206000.0
         }
       ]
     }
   },
   {
-    "job_id": "455f4c5099f24ebf87507ddf885fca43",
+    "job_id": "fbf5c0a298354b44a7c07588d5d21558",
     "job_name": "refresh_materialized_views",
     "schedule": "Every 30 minutes (Interval: 1800s)",
-    "start_time": "2026-10-04T16:40:03.018761+00:00",
-    "end_time": "2026-10-04T16:40:03.099489+00:00",
-    "duration_ms": 80.67,
+    "start_time": "2026-10-04T17:45:38.023118+00:00",
+    "end_time": "2026-10-04T17:45:38.209996+00:00",
+    "duration_ms": 186.61,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
@@ -1344,26 +636,34 @@
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 18.05
+        "duration_ms": 29.31
+      },
+      "top_products_summary": {
+        "view_name": "top_products_summary",
+        "mode": "incremental",
+        "status": "SUCCESS",
+        "affected_keys": 2,
+        "total_documents_in_view": 2,
+        "duration_ms": 47.19
       },
       "customer_metrics": {
         "view_name": "mv_customer_metrics",
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 32.16
+        "duration_ms": 58.27
       },
-      "refreshed_at": "2026-10-04T16:40:03.099489+00:00",
+      "refreshed_at": "2026-10-04T17:45:38.209996+00:00",
       "incremental": true
     }
   },
   {
-    "job_id": "78aebe11c95d4ab3a493b152cb90adcf",
+    "job_id": "a315341d467b4975866fb990b46da524",
     "job_name": "refresh_materialized_views",
     "schedule": "Every 30 minutes (Interval: 1800s)",
-    "start_time": "2026-10-04T16:37:37.256878+00:00",
-    "end_time": "2026-10-04T16:37:37.320894+00:00",
-    "duration_ms": 64.68,
+    "start_time": "2026-10-04T17:44:57.966981+00:00",
+    "end_time": "2026-10-04T17:44:58.051273+00:00",
+    "duration_ms": 83.63,
     "success": true,
     "status": "SUCCESS",
     "error_details": null,
@@ -1373,16 +673,231 @@
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 6.57
+        "duration_ms": 7.17
+      },
+      "top_products_summary": {
+        "view_name": "top_products_summary",
+        "mode": "incremental",
+        "status": "SUCCESS",
+        "affected_keys": 2,
+        "total_documents_in_view": 2,
+        "duration_ms": 8.47
       },
       "customer_metrics": {
         "view_name": "mv_customer_metrics",
         "mode": "incremental",
         "status": "UP_TO_DATE",
         "affected_keys": 0,
-        "duration_ms": 31.29
+        "duration_ms": 18.83
       },
-      "refreshed_at": "2026-10-04T16:37:37.320894+00:00",
+      "refreshed_at": "2026-10-04T17:44:58.051273+00:00",
+      "incremental": true
+    }
+  },
+  {
+    "job_id": "8c2bef899cf54dc2b3bb4794de13b745",
+    "job_name": "generate_analytics_snapshot",
+    "schedule": "Every 60 minutes (Interval: 3600s)",
+    "start_time": "2026-10-04T17:44:38.546519+00:00",
+    "end_time": "2026-10-04T17:44:38.605637+00:00",
+    "duration_ms": 59.43,
+    "success": true,
+    "status": "SUCCESS",
+    "error_details": null,
+    "metrics": {
+      "snapshot_id": "9525b9d5be064fdda6143ec46fad027f",
+      "created_at": "2026-10-04T17:44:38.546519+00:00",
+      "reports_summary": {
+        "cities_tracked": 1,
+        "top_customers_count": 10,
+        "days_recorded": 2,
+        "status_combinations": 1,
+        "delivery_routes": 1
+      },
+      "sales_by_city": [
+        {
+          "order_count": 101,
+          "city": "صنعاء",
+          "total_sales": 1206000.0,
+          "avg_order_value": 11940.59,
+          "max_order_value": 12000.0,
+          "min_order_value": 6000.0,
+          "total_delivery_fees": 201000.0
+        }
+      ],
+      "top_customers": [
+        {
+          "customer_name": "عميل رقم 78",
+          "customer_phone": "+967771000078",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0078",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 15",
+          "customer_phone": "+967771000015",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0015",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 63",
+          "customer_phone": "+967771000063",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0063",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 40",
+          "customer_phone": "+967771000040",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0040",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 64",
+          "customer_phone": "+967771000064",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0064",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 48",
+          "customer_phone": "+967771000048",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0048",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 6",
+          "customer_phone": "+967771000006",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0006",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 22",
+          "customer_phone": "+967771000022",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0022",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 29",
+          "customer_phone": "+967771000029",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0029",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        },
+        {
+          "customer_name": "عميل رقم 87",
+          "customer_phone": "+967771000087",
+          "city": "صنعاء",
+          "total_orders": 1,
+          "latest_order_date": "2026-08-20T10:00:00",
+          "customer_id": "CUST-0087",
+          "total_spent": 12000.0,
+          "avg_order_value": 12000.0
+        }
+      ],
+      "sales_by_period": [
+        {
+          "order_count": 100,
+          "period": "2026-08-20",
+          "total_revenue": 1200000.0,
+          "avg_daily_order": 12000.0,
+          "total_delivery_revenue": 200000.0
+        },
+        {
+          "order_count": 1,
+          "period": "2026-05-01",
+          "total_revenue": 6000.0,
+          "avg_daily_order": 6000.0,
+          "total_delivery_revenue": 1000.0
+        }
+      ],
+      "orders_by_status": [
+        {
+          "order_count": 101,
+          "order_status": "مؤكد",
+          "payment_status": "تم الدفع",
+          "total_volume": 1206000.0,
+          "avg_amount": 11940.59
+        }
+      ],
+      "delivery_performance": [
+        {
+          "total_shipments": 101,
+          "city": "صنعاء",
+          "delivery_type": "سريع",
+          "total_delivery_cost": 201000.0,
+          "avg_delivery_cost": 1990.1,
+          "total_merchandise_value": 1206000.0
+        }
+      ]
+    }
+  },
+  {
+    "job_id": "d4b18281e08b45a3958425a74c29fd4b",
+    "job_name": "refresh_materialized_views",
+    "schedule": "Every 30 minutes (Interval: 1800s)",
+    "start_time": "2026-10-04T17:44:38.434096+00:00",
+    "end_time": "2026-10-04T17:44:38.543000+00:00",
+    "duration_ms": 108.34,
+    "success": true,
+    "status": "SUCCESS",
+    "error_details": null,
+    "metrics": {
+      "daily_sales_summary": {
+        "view_name": "mv_daily_sales_summary",
+        "mode": "incremental",
+        "status": "UP_TO_DATE",
+        "affected_keys": 0,
+        "duration_ms": 10.2
+      },
+      "top_products_summary": {
+        "view_name": "top_products_summary",
+        "mode": "incremental",
+        "status": "SUCCESS",
+        "affected_keys": 2,
+        "total_documents_in_view": 2,
+        "duration_ms": 26.38
+      },
+      "customer_metrics": {
+        "view_name": "mv_customer_metrics",
+        "mode": "incremental",
+        "status": "UP_TO_DATE",
+        "affected_keys": 0,
+        "duration_ms": 32.68
+      },
+      "refreshed_at": "2026-10-04T17:44:38.543000+00:00",
       "incremental": true
     }
   }

@@ -250,10 +250,78 @@ def report_delivery_performance(
     return list(coll.aggregate(pipeline))
 
 
+# ---------------------------------------------------------------------------
+# Aggregation Report 6: Top Selling Products
+# ---------------------------------------------------------------------------
+def report_top_products(
+    limit: int = 20,
+    collection_name: str = VALIDATED_COLLECTION,
+) -> List[Dict[str, Any]]:
+    """
+    Report 6: Analyzes product sales volume, quantities, and revenue.
+    Extracts item data from items_json / items across validated orders.
+    """
+    coll = get_collection(collection_name)
+    cursor = coll.find(
+        {"status": {"$nin": ["ملغي", "مرتجع", "CANCELLED"]}},
+        {"items_json": 1, "items": 1, "order_id": 1, "city": 1}
+    )
+    product_stats: Dict[str, Dict[str, Any]] = {}
+    import json
+    for doc in cursor:
+        items = doc.get("items")
+        if not items and doc.get("items_json"):
+            raw = doc.get("items_json")
+            if isinstance(raw, str):
+                try:
+                    items = json.loads(raw)
+                except Exception:
+                    items = None
+            elif isinstance(raw, list):
+                items = raw
+
+        if not items or not isinstance(items, list):
+            continue
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            sku = str(item.get("sku") or item.get("name") or "ITEM-UNKNOWN")
+            name = str(item.get("name") or sku)
+            qty = float(item.get("qty") or 1)
+            unit_price = float(item.get("unit_price") or 0.0)
+            total = float(item.get("total") or (qty * unit_price))
+
+            if sku not in product_stats:
+                product_stats[sku] = {
+                    "sku": sku,
+                    "product_name": name,
+                    "total_quantity_sold": 0,
+                    "total_revenue": 0.0,
+                    "order_count": 0,
+                }
+            product_stats[sku]["total_quantity_sold"] += int(qty)
+            product_stats[sku]["total_revenue"] += total
+            product_stats[sku]["order_count"] += 1
+
+    sorted_products = sorted(
+        product_stats.values(),
+        key=lambda x: x["total_revenue"],
+        reverse=True,
+    )[:limit]
+
+    for p in sorted_products:
+        p["total_revenue"] = round(p["total_revenue"], 2)
+
+    return sorted_products
+
+
 AGGREGATION_REGISTRY = {
     "sales_by_city": report_sales_by_city,
+    "top_products": report_top_products,
     "top_customers": report_top_customers,
     "sales_by_period": report_sales_by_period,
     "orders_by_status": report_orders_by_status,
     "delivery_performance": report_delivery_performance,
 }
+

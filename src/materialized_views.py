@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 MV_DAILY_SALES = "mv_daily_sales_summary"
 MV_CUSTOMER_METRICS = "mv_customer_metrics"
+MV_TOP_PRODUCTS = "mv_top_products_summary"
 MV_METADATA_COLLECTION = "mv_refresh_metadata"
 
 
@@ -168,10 +169,15 @@ def refresh_daily_sales_summary(
 
     results = list(source_coll.aggregate(pipeline))
 
+    alias_coll = db["daily_sales_summary"]
+    alias_coll.create_index([("date", ASCENDING)], unique=True)
+
     if mode == "full":
         target_coll.delete_many({})
+        alias_coll.delete_many({})
         if results:
             target_coll.insert_many(results)
+            alias_coll.insert_many(results)
     else:
         # Incremental replace / upsert on _id (date)
         if results:
@@ -180,15 +186,17 @@ def refresh_daily_sales_summary(
                 for doc in results
             ]
             target_coll.bulk_write(operations)
+            alias_coll.bulk_write(operations)
 
     duration = (time.perf_counter() - t0) * 1000
     affected_keys = len(results)
     total_docs = target_coll.count_documents({})
 
     update_metadata(MV_DAILY_SALES, mode, total_docs, affected_keys, duration)
+    update_metadata("daily_sales_summary", mode, total_docs, affected_keys, duration)
 
     return {
-        "view_name": MV_DAILY_SALES,
+        "view_name": "daily_sales_summary",
         "mode": mode,
         "status": "SUCCESS",
         "affected_keys": affected_keys,
@@ -309,13 +317,65 @@ def refresh_customer_metrics(
     }
 
 
+# ---------------------------------------------------------------------------
+# Materialized View 3: Top Products Summary (top_products_summary)
+# ---------------------------------------------------------------------------
+def refresh_top_products_summary(
+    incremental: bool = True,
+    limit: int = 50,
+) -> Dict[str, Any]:
+    """
+    Refreshes top_products_summary and mv_top_products_summary.
+    Aggregates product performance and upserts into materialized view collections.
+    """
+    db = get_db()
+    target_coll = db[MV_TOP_PRODUCTS]
+    alias_coll = db["top_products_summary"]
+    t0 = time.perf_counter()
+
+    target_coll.create_index([("sku", ASCENDING)], unique=True)
+    alias_coll.create_index([("sku", ASCENDING)], unique=True)
+
+    from aggregations import report_top_products
+    results = report_top_products(limit=limit)
+
+    for doc in results:
+        doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+        if "_id" not in doc:
+            doc["_id"] = doc["sku"]
+
+    if results:
+        ops = [ReplaceOne({"_id": d["_id"]}, d, upsert=True) for d in results]
+        target_coll.bulk_write(ops)
+        alias_coll.bulk_write(ops)
+
+    duration = (time.perf_counter() - t0) * 1000
+    affected_keys = len(results)
+    total_docs = target_coll.count_documents({})
+
+    mode = "incremental" if incremental else "full"
+    update_metadata(MV_TOP_PRODUCTS, mode, total_docs, affected_keys, duration)
+    update_metadata("top_products_summary", mode, total_docs, affected_keys, duration)
+
+    return {
+        "view_name": "top_products_summary",
+        "mode": mode,
+        "status": "SUCCESS",
+        "affected_keys": affected_keys,
+        "total_documents_in_view": total_docs,
+        "duration_ms": round(duration, 2),
+    }
+
+
 def refresh_all_materialized_views(incremental: bool = True) -> Dict[str, Any]:
     """Refreshes all registered materialized views."""
     r1 = refresh_daily_sales_summary(incremental=incremental)
-    r2 = refresh_customer_metrics(incremental=incremental)
+    r2 = refresh_top_products_summary(incremental=incremental)
+    r3 = refresh_customer_metrics(incremental=incremental)
     return {
         "daily_sales_summary": r1,
-        "customer_metrics": r2,
+        "top_products_summary": r2,
+        "customer_metrics": r3,
         "refreshed_at": datetime.now(timezone.utc).isoformat(),
         "incremental": incremental,
     }
@@ -324,7 +384,7 @@ def refresh_all_materialized_views(incremental: bool = True) -> Dict[str, Any]:
 def list_materialized_views_status() -> List[Dict[str, Any]]:
     """Returns the current state and metadata of all registered views."""
     db = get_db()
-    views = [MV_DAILY_SALES, MV_CUSTOMER_METRICS]
+    views = [MV_DAILY_SALES, MV_TOP_PRODUCTS, MV_CUSTOMER_METRICS]
     status_list = []
     for v in views:
         meta = get_metadata(v) or {}
